@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation';
 import { getUserProfile } from '@/lib/auth';
 import { Card } from '../_components/Card';
 import { Button } from '../_components/Button';
-import { supabase } from '@/lib/supabaseClient';
 
 async function LogoutButton() {
   return (
@@ -55,7 +54,7 @@ export default async function DashboardPage() {
             </h2>
             {profile.full_name && (
               <p className="text-gray-600">
-                Hello, {profile.full_name}! You're logged in as a {profile.role}.
+                Hello, {profile.full_name}! You&apos;re logged in as a {profile.role}.
               </p>
             )}
             <div className="pt-4 text-sm text-gray-500">
