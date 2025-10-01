@@ -63,8 +63,8 @@ function VerifyOTPContent() {
 
       router.push('/dashboard');
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || 'Invalid verification code. Please try again.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Invalid verification code. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -128,7 +128,7 @@ function VerifyOTPContent() {
           </Form>
 
           <div className="mt-6 text-center text-sm text-gray-600">
-            Didn't receive the code?{' '}
+            Didn&apos;t receive the code?{' '}
             <button
               onClick={() => setError('Please check your spam folder or try signing up again.')}
               className="text-primary-600 font-medium hover:text-primary-700 hover:underline"

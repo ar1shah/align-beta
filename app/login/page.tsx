@@ -31,8 +31,8 @@ export default function LoginPage() {
 
       router.push('/dashboard');
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || 'Failed to log in. Please try again.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to log in. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -103,7 +103,7 @@ export default function LoginPage() {
           </Form>
 
           <div className="mt-6 text-center text-sm text-gray-600">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link
               href="/signup"
               className="text-primary-600 font-medium hover:text-primary-700 hover:underline"

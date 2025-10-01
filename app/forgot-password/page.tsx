@@ -36,8 +36,8 @@ export default function ForgotPasswordPage() {
       if (resetError) throw resetError;
 
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || 'Failed to send reset email. Please try again.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to send reset email. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -56,9 +56,9 @@ export default function ForgotPasswordPage() {
           <h1 className="mt-6 text-2xl font-semibold text-gray-900">
             Reset your password
           </h1>
-          <p className="mt-2 text-gray-600">
-            We'll send you a link to reset your password
-          </p>
+      <p className="mt-2 text-gray-600">
+        We&apos;ll send you a link to reset your password
+      </p>
         </div>
 
         <Card>
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
               role="alert"
               aria-live="polite"
             >
-              Check your email! We've sent you a password reset link.
+              Check your email! We&apos;ve sent you a password reset link.
             </div>
           )}
 

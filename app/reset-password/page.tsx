@@ -53,8 +53,8 @@ export default function ResetPasswordPage() {
 
       // Success - redirect to login
       router.push('/login?message=Password updated successfully');
-    } catch (err: any) {
-      setError(err.message || 'Failed to update password. Please try again.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to update password. Please try again.');
     } finally {
       setLoading(false);
     }
