@@ -82,16 +82,16 @@ export function MSASignCard({ hasSigned, realtorId }: MSASignCardProps) {
 
         <div className="space-y-4 text-sm text-gray-700">
           <p>
-            This Master Service Agreement ("Agreement") is entered into between
-            Align Agents RE ("Align") and the undersigned real estate agent
-            ("Realtor").
+            This Master Service Agreement (&quot;Agreement&quot;) is entered into between
+            Align Agents RE (&quot;Align&quot;) and the undersigned real estate agent
+            (&quot;Realtor&quot;).
           </p>
 
           <div>
             <h4 className="font-semibold text-gray-900 mb-2">1. Services</h4>
             <p>
               Align will provide qualified buyer and seller leads to Realtor within
-              Realtor's designated service areas. Realtor agrees to respond to
+              Realtor&apos;s designated service areas. Realtor agrees to respond to
               assigned leads within 24 hours and provide professional representation.
             </p>
           </div>
@@ -108,7 +108,7 @@ export function MSASignCard({ hasSigned, realtorId }: MSASignCardProps) {
           <div>
             <h4 className="font-semibold text-gray-900 mb-2">3. Territory</h4>
             <p>
-              Realtor's territory and coverage areas will be defined in their
+              Realtor&apos;s territory and coverage areas will be defined in their
               profile settings and may be updated at any time.
             </p>
           </div>
@@ -139,7 +139,7 @@ export function MSASignCard({ hasSigned, realtorId }: MSASignCardProps) {
             <p>
               This Agreement remains in effect until terminated by either party with
               30 days written notice. All pending transactions at termination will
-              be completed under this Agreement's terms.
+              be completed under this Agreement&apos;s terms.
             </p>
           </div>
         </div>

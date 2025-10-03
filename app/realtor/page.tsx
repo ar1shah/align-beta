@@ -93,7 +93,7 @@ export default async function RealtorDashboard() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
         <p className="mt-2 text-gray-600">
-          Welcome back! Here's what's happening with your business.
+          Welcome back! Here&apos;s what&apos;s happening with your business.
         </p>
       </div>
 
@@ -124,7 +124,7 @@ export default async function RealtorDashboard() {
           <div className="flex items-center gap-2 mb-4">
             <AlertCircleIcon className="w-5 h-5 text-blue-600" />
             <h2 className="text-lg font-semibold text-gray-900">
-              Today's Appointments
+              Today&apos;s Appointments
             </h2>
           </div>
           <div className="space-y-3">

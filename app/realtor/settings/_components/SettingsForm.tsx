@@ -4,11 +4,16 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { RealtorProfile } from '@/lib/db/profile';
 
+interface BaseProfile {
+  full_name?: string;
+  phone?: string;
+}
+
 interface SettingsFormProps {
   realtorId: string;
   email: string;
   initialProfile: RealtorProfile | null;
-  baseProfile: any;
+  baseProfile: BaseProfile | null;
 }
 
 export function SettingsForm({
@@ -98,7 +103,7 @@ export function SettingsForm({
 
       setMessage('Profile updated successfully!');
       router.refresh();
-    } catch (error) {
+    } catch {
       setMessage('Failed to update profile');
     } finally {
       setLoading(false);

@@ -12,7 +12,7 @@ export interface CrmClient {
   phone: string | null;
   role: 'buyer' | 'seller' | null;
   timeline: string | null;
-  criteria: any;
+  criteria: Record<string, unknown> | null;
   property_links: string[] | null;
   status: ClientStatus;
 }
