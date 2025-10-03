@@ -59,9 +59,19 @@ function VerifyOTPContent() {
             role: 'client',
           });
         }
+
+        // Route based on role
+        if (profile?.role === 'realtor') {
+          router.push('/realtor');
+        } else if (profile?.role === 'admin') {
+          router.push('/dashboard'); // or /admin when built
+        } else {
+          router.push('/dashboard'); // or /client when built
+        }
+      } else {
+        router.push('/dashboard');
       }
 
-      router.push('/dashboard');
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Invalid verification code. Please try again.');

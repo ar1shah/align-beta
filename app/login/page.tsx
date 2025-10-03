@@ -22,14 +22,29 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { error: signInError, data } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (signInError) throw signInError;
 
-      router.push('/dashboard');
+      // Get user profile to determine role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+
+      // Route based on role
+      if (profile?.role === 'realtor') {
+        router.push('/realtor');
+      } else if (profile?.role === 'admin') {
+        router.push('/dashboard'); // or /admin when built
+      } else {
+        router.push('/dashboard'); // or /client when built
+      }
+      
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to log in. Please try again.');

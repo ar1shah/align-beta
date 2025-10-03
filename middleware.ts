@@ -43,6 +43,27 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Protect /realtor routes - realtor role only
+  if (request.nextUrl.pathname.startsWith('/realtor')) {
+    if (!session) {
+      const redirectUrl = new URL('/login', request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    // Check if user has realtor role
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single();
+
+    if (profile?.role !== 'realtor') {
+      // Redirect non-realtors to dashboard
+      const redirectUrl = new URL('/dashboard', request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
   return response;
 }
 
