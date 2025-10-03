@@ -36,7 +36,7 @@ export function MSASignCard({ hasSigned, realtorId }: MSASignCardProps) {
       }
 
       router.refresh();
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.');
       setSigning(false);
     }

@@ -109,7 +109,7 @@ export function LeadsKanban({ initialLeads, realtorId }: LeadsKanbanProps) {
           prev.map((l) => (l.id === leadId ? lead : l))
         );
       }
-    } catch (error) {
+    } catch {
       // Revert on error
       setLeads((prev) =>
         prev.map((l) => (l.id === leadId ? lead : l))

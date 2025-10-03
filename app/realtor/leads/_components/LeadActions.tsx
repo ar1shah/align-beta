@@ -28,7 +28,7 @@ export function LeadActions({ lead, onClose }: LeadActionsProps) {
       });
       router.refresh();
       onClose();
-    } catch (error) {
+    } catch {
       alert('Failed to set next touch');
     } finally {
       setLoading(false);
@@ -50,7 +50,7 @@ export function LeadActions({ lead, onClose }: LeadActionsProps) {
       });
       router.refresh();
       onClose();
-    } catch (error) {
+    } catch {
       alert('Failed to decline lead');
     } finally {
       setLoading(false);
@@ -69,7 +69,7 @@ export function LeadActions({ lead, onClose }: LeadActionsProps) {
       });
       router.refresh();
       onClose();
-    } catch (error) {
+    } catch {
       alert('Failed to convert to client');
     } finally {
       setLoading(false);

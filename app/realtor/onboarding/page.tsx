@@ -18,7 +18,7 @@ export default async function OnboardingPage() {
   ]);
 
   const msaContract = contracts.find((c) => c.type === 'msa');
-  const hasSigned = msaContract && msaContract.status === 'completed';
+  const hasSigned = Boolean(msaContract && msaContract.status === 'completed');
 
   return (
     <div className="max-w-4xl space-y-8">
