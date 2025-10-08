@@ -1,0 +1,507 @@
+{
+  "version": "v1",
+  "sections": [
+    {
+      "key": "entry",
+      "title": "Let's get you matched",
+      "description": "Tell us what you're here to do. You can skip anything later.",
+      "sort_order": 10,
+      "is_optional": false,
+      "visible_if": null,
+      "questions": [
+        {
+          "key": "purpose",
+          "type": "single_choice",
+          "prompt": "What are you looking to do today?",
+          "required": true,
+          "sort_order": 10,
+          "options": [
+            {"label": "Buy", "value": "buy", "tags": ["buyer"]},
+            {"label": "Sell", "value": "sell", "tags": ["seller"]},
+            {"label": "Both", "value": "both", "tags": ["buyer","seller"]},
+            {"label": "Just exploring", "value": "exploring", "tags": []}
+          ]
+        },
+        {
+          "key": "chosen_categories",
+          "type": "multi_choice",
+          "prompt": "Which sections would you like to complete? (You can skip later.)",
+          "required": false,
+          "sort_order": 20,
+          "options": [
+            {"label": "Buy/Sell details", "value": "details"},
+            {"label": "Motivation & timing", "value": "motivation"},
+            {"label": "Realtor preferences", "value": "realtor_prefs"},
+            {"label": "Communication style", "value": "communication"},
+            {"label": "Location preferences", "value": "location"},
+            {"label": "Additional details", "value": "additional"}
+          ]
+        }
+      ]
+    },
+    {
+      "key": "sell_details",
+      "title": "Selling details",
+      "description": "A few quick things about the property you want to sell.",
+      "sort_order": 20,
+      "is_optional": true,
+      "visible_if": { "any": [ { "q": "purpose", "op": "in", "value": ["sell","both"] } ] },
+      "questions": [
+        {
+          "key": "sell_property_type",
+          "type": "single_choice",
+          "prompt": "What type of property are you selling?",
+          "required": true,
+          "sort_order": 10,
+          "options": [
+            {"label":"Single-family","value":"single_family"},
+            {"label":"Townhouse","value":"townhouse"},
+            {"label":"Condo","value":"condo"},
+            {"label":"Multi-family","value":"multi_family"},
+            {"label":"Land","value":"land"},
+            {"label":"Commercial","value":"commercial"},
+            {"label":"Other","value":"other"}
+          ]
+        },
+        {
+          "key": "sell_address_mode",
+          "type": "single_choice",
+          "prompt": "Share your property location as:",
+          "required": true,
+          "sort_order": 15,
+          "options": [
+            {"label":"Full address","value":"full"},
+            {"label":"City/ZIP only","value":"partial"}
+          ]
+        },
+        {
+          "key": "sell_property_address",
+          "type": "address",
+          "prompt": "Property address",
+          "required": false,
+          "sort_order": 16,
+          "visible_if": { "all":[{"q":"sell_address_mode","op":"eq","value":"full"}] }
+        },
+        {
+          "key": "sell_city_zip",
+          "type": "short_text",
+          "prompt": "City or ZIP",
+          "required": false,
+          "sort_order": 17,
+          "visible_if": { "all":[{"q":"sell_address_mode","op":"eq","value":"partial"}] }
+        },
+        {
+          "key": "sell_timeline",
+          "type": "single_choice",
+          "prompt": "Ideal timeline to sell?",
+          "required": true,
+          "sort_order": 20,
+          "options": [
+            {"label":"ASAP (0–30 days)","value":"0_30"},
+            {"label":"30–90 days","value":"30_90"},
+            {"label":"3–6 months","value":"3_6"},
+            {"label":"6+ months","value":"6_plus"},
+            {"label":"Just exploring","value":"exploring"}
+          ]
+        },
+        {
+          "key": "sell_asking_price",
+          "type": "money",
+          "prompt": "Asking price in mind? (optional)",
+          "required": false,
+          "sort_order": 30
+        },
+        {
+          "key": "sell_listed_before",
+          "type": "yes_no",
+          "prompt": "Listed this property before?",
+          "required": true,
+          "sort_order": 40
+        },
+        {
+          "key": "sell_cash_offer",
+          "type": "single_choice",
+          "prompt": "Open to cash offers?",
+          "required": true,
+          "sort_order": 50,
+          "options": [
+            {"label":"Yes","value":"yes"},
+            {"label":"No","value":"no"},
+            {"label":"Maybe","value":"maybe"}
+          ]
+        }
+      ]
+    },
+    {
+      "key": "buy_details",
+      "title": "Buying details",
+      "description": "Tell us what you want to buy and where.",
+      "sort_order": 30,
+      "is_optional": true,
+      "visible_if": { "any": [ { "q": "purpose", "op": "in", "value": ["buy","both"] } ] },
+      "questions": [
+        {
+          "key": "buy_type",
+          "type": "single_choice",
+          "prompt": "Looking to buy what type of property?",
+          "required": true,
+          "sort_order": 10,
+          "options": [
+            {"label":"House","value":"house"},
+            {"label":"Condo/Townhome","value":"condo_townhome"},
+            {"label":"Investment","value":"investment"},
+            {"label":"Land","value":"land"},
+            {"label":"Other","value":"other"}
+          ]
+        },
+        {
+          "key": "buy_budget",
+          "type": "single_choice",
+          "prompt": "Budget range?",
+          "required": true,
+          "sort_order": 20,
+          "options": [
+            {"label":"<$200k","value":"lt_200"},
+            {"label":"$200k–$350k","value":"200_350"},
+            {"label":"$350k–$500k","value":"350_500"},
+            {"label":"$500k–$750k","value":"500_750"},
+            {"label":"$750k–$1M","value":"750_1m"},
+            {"label":">$1M","value":"gt_1m"}
+          ]
+        },
+        {
+          "key": "buy_areas",
+          "type": "multi_choice",
+          "prompt": "Which areas or neighborhoods interest you?",
+          "required": false,
+          "sort_order": 30,
+          "ui_props": { "allowCustom": true }
+        },
+        {
+          "key": "buy_financing",
+          "type": "single_choice",
+          "prompt": "Financing plan?",
+          "required": true,
+          "sort_order": 40,
+          "options": [
+            {"label":"Cash","value":"cash"},
+            {"label":"Pre-approved","value":"preapproved"},
+            {"label":"Need pre-approval","value":"need_preapproval"}
+          ]
+        },
+        {
+          "key": "buy_timeline",
+          "type": "single_choice",
+          "prompt": "How soon are you looking to move forward?",
+          "required": true,
+          "sort_order": 50,
+          "options": [
+            {"label":"ASAP","value":"asap"},
+            {"label":"30–90 days","value":"30_90"},
+            {"label":"3–6 months","value":"3_6"},
+            {"label":"6+ months","value":"6_plus"},
+            {"label":"Just exploring","value":"exploring"}
+          ]
+        },
+        {
+          "key": "buy_min_beds",
+          "type": "number",
+          "prompt": "Minimum bedrooms? (optional)",
+          "required": false,
+          "sort_order": 60
+        },
+        {
+          "key": "buy_min_baths",
+          "type": "number",
+          "prompt": "Minimum bathrooms? (optional)",
+          "required": false,
+          "sort_order": 70
+        }
+      ]
+    },
+    {
+      "key": "motivation",
+      "title": "Motivation & timing",
+      "description": "What's driving your move?",
+      "sort_order": 40,
+      "is_optional": true,
+      "visible_if": null,
+      "questions": [
+        {
+          "key": "why_now",
+          "type": "single_choice",
+          "prompt": "Why are you looking to buy/sell right now?",
+          "required": true,
+          "sort_order": 10,
+          "options": [
+            {"label":"Job move","value":"job_move"},
+            {"label":"Family change","value":"family"},
+            {"label":"Investment","value":"investment"},
+            {"label":"Relocation","value":"relocation"},
+            {"label":"Upgrade","value":"upgrade"},
+            {"label":"Downsize","value":"downsize"},
+            {"label":"First-time buyer","value":"first_time"},
+            {"label":"Financial","value":"financial"},
+            {"label":"Other","value":"other"}
+          ]
+        },
+        {
+          "key": "working_with_realtor",
+          "type": "single_choice",
+          "prompt": "Already working with a realtor?",
+          "required": true,
+          "sort_order": 20,
+          "options": [
+            {"label":"No","value":"no"},
+            {"label":"Yes","value":"yes"}
+          ]
+        },
+        {
+          "key": "current_agent_name",
+          "type": "short_text",
+          "prompt": "Name or brokerage (optional)",
+          "required": false,
+          "sort_order": 25,
+          "visible_if": { "all":[{"q":"working_with_realtor","op":"eq","value":"yes"}] }
+        },
+        {
+          "key": "priority",
+          "type": "single_choice",
+          "prompt": "What matters most right now?",
+          "required": true,
+          "sort_order": 30,
+          "options": [
+            {"label":"Speed","value":"speed"},
+            {"label":"Best price","value":"price"},
+            {"label":"Minimal hassle","value":"low_hassle"},
+            {"label":"Strategy & guidance","value":"strategy"}
+          ]
+        }
+      ]
+    },
+    {
+      "key": "realtor_prefs",
+      "title": "Realtor preferences",
+      "description": "Help us match you with the right style of agent.",
+      "sort_order": 50,
+      "is_optional": true,
+      "visible_if": null,
+      "questions": [
+        {
+          "key": "experience_pref",
+          "type": "single_choice",
+          "prompt": "Experience preference?",
+          "required": false,
+          "sort_order": 10,
+          "options": [
+            {"label":"10+ years","value":"10_plus"},
+            {"label":"3–10 years","value":"3_10"},
+            {"label":"Newer but hungry","value":"newer"},
+            {"label":"No preference","value":"any"}
+          ]
+        },
+        {
+          "key": "solo_or_team",
+          "type": "single_choice",
+          "prompt": "Solo agent or team?",
+          "required": false,
+          "sort_order": 20,
+          "options": [
+            {"label":"Solo","value":"solo"},
+            {"label":"Team","value":"team"},
+            {"label":"No preference","value":"any"}
+          ]
+        },
+        {
+          "key": "expertise",
+          "type": "multi_choice",
+          "prompt": "Specific expertise important?",
+          "required": false,
+          "sort_order": 30,
+          "options": [
+            {"label":"Luxury","value":"luxury"},
+            {"label":"Investment","value":"investment"},
+            {"label":"First-time buyers","value":"first_time"},
+            {"label":"Probate/Pre-foreclosure","value":"distress"},
+            {"label":"New construction","value":"new_build"},
+            {"label":"Waterfront/STR","value":"waterfront_str"},
+            {"label":"Not important","value":"na"}
+          ]
+        },
+        {
+          "key": "closed_in_price_area",
+          "type": "single_choice",
+          "prompt": "Deals closed in your price/area is…",
+          "required": false,
+          "sort_order": 40,
+          "options": [
+            {"label":"Very important","value":"very"},
+            {"label":"Nice-to-have","value":"nice"},
+            {"label":"Not important","value":"not"}
+          ]
+        },
+        {
+          "key": "volume_vs_personalization",
+          "type": "single_choice",
+          "prompt": "Volume vs personalization?",
+          "required": false,
+          "sort_order": 50,
+          "options": [
+            {"label":"High volume","value":"volume"},
+            {"label":"Highly personalized","value":"personal"},
+            {"label":"Balanced","value":"balanced"}
+          ]
+        }
+      ]
+    },
+    {
+      "key": "communication",
+      "title": "Communication style",
+      "description": "How should your agent keep you in the loop?",
+      "sort_order": 60,
+      "is_optional": true,
+      "visible_if": null,
+      "questions": [
+        {
+          "key": "update_frequency",
+          "type": "single_choice",
+          "prompt": "How often do you want updates?",
+          "required": false,
+          "sort_order": 10,
+          "options": [
+            {"label":"Daily","value":"daily"},
+            {"label":"Weekly","value":"weekly"},
+            {"label":"Only when there's movement","value":"on_change"}
+          ]
+        },
+        {
+          "key": "channel",
+          "type": "single_choice",
+          "prompt": "Preferred channel?",
+          "required": false,
+          "sort_order": 20,
+          "options": [
+            {"label":"Text","value":"text"},
+            {"label":"Phone","value":"phone"},
+            {"label":"Email","value":"email"},
+            {"label":"Any","value":"any"}
+          ]
+        },
+        {
+          "key": "nights_weekends",
+          "type": "yes_no",
+          "prompt": "Need nights/weekends availability?",
+          "required": false,
+          "sort_order": 30
+        },
+        {
+          "key": "tone",
+          "type": "single_choice",
+          "prompt": "Style preference?",
+          "required": false,
+          "sort_order": 40,
+          "options": [
+            {"label":"Very direct","value":"direct"},
+            {"label":"Consultative/laid-back","value":"consultative"},
+            {"label":"Balanced","value":"balanced"}
+          ]
+        }
+      ]
+    },
+    {
+      "key": "location",
+      "title": "Location preferences",
+      "description": "Local ties and network.",
+      "sort_order": 70,
+      "is_optional": true,
+      "visible_if": null,
+      "questions": [
+        {
+          "key": "must_live_local",
+          "type": "single_choice",
+          "prompt": "Agent must live in same city/neighborhood?",
+          "required": false,
+          "sort_order": 10,
+          "options": [
+            {"label":"Yes","value":"yes"},
+            {"label":"Area knowledge is enough","value":"area_ok"}
+          ]
+        },
+        {
+          "key": "vendor_connections",
+          "type": "multi_choice",
+          "prompt": "Want local connections?",
+          "required": false,
+          "sort_order": 20,
+          "options": [
+            {"label":"Contractors","value":"contractors"},
+            {"label":"Lenders","value":"lenders"},
+            {"label":"Stagers","value":"stagers"}
+          ]
+        },
+        {
+          "key": "special_property_types",
+          "type": "multi_choice",
+          "prompt": "Special property types?",
+          "required": false,
+          "sort_order": 30,
+          "options": [
+            {"label":"Waterfront","value":"waterfront"},
+            {"label":"Short-term rental","value":"str"},
+            {"label":"Farm/Ranch","value":"farm"},
+            {"label":"Condo/HOA","value":"condo"},
+            {"label":"New build","value":"new_build"},
+            {"label":"Accessibility needs","value":"access"},
+            {"label":"Not needed","value":"na"}
+          ]
+        }
+      ]
+    },
+    {
+      "key": "additional",
+      "title": "Anything else?",
+      "description": "Optional notes.",
+      "sort_order": 80,
+      "is_optional": true,
+      "visible_if": null,
+      "questions": [
+        {
+          "key": "notes",
+          "type": "long_text",
+          "prompt": "Anything else we should know?",
+          "required": false,
+          "sort_order": 10
+        }
+      ]
+    },
+    {
+      "key": "contact",
+      "title": "Contact & submit",
+      "description": "How can we reach you?",
+      "sort_order": 90,
+      "is_optional": false,
+      "visible_if": null,
+      "questions": [
+        {"key":"full_name","type":"short_text","prompt":"Full name","required":true,"sort_order":10},
+        {"key":"email","type":"email","prompt":"Email","required":true,"sort_order":20},
+        {"key":"phone","type":"phone","prompt":"Phone","required":true,"sort_order":30},
+        {"key":"mailing_address","type":"address","prompt":"Mailing address (optional)","required":false,"sort_order":40},
+        {
+          "key":"best_time",
+          "type":"single_choice",
+          "prompt":"Best time to reach you?",
+          "required":false,
+          "sort_order":50,
+          "options":[
+            {"label":"Mornings","value":"mornings"},
+            {"label":"Afternoons","value":"afternoons"},
+            {"label":"Evenings","value":"evenings"},
+            {"label":"Any","value":"any"}
+          ]
+        },
+        {"key":"consent","type":"yes_no","prompt":"I agree to be contacted about my request.","required":true,"sort_order":60}
+      ]
+    }
+  ]
+}
+

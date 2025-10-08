@@ -60,7 +60,7 @@ export default async function DashboardPage() {
             <div className="pt-4 text-sm text-gray-500">
               <p>Your authentication is working correctly.</p>
               <p className="mt-1">
-                More features coming soon...
+                Dashboard features coming soon...
               </p>
             </div>
           </div>

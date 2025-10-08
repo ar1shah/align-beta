@@ -66,7 +66,8 @@ function VerifyOTPContent() {
         } else if (profile?.role === 'admin') {
           router.push('/dashboard'); // or /admin when built
         } else {
-          router.push('/dashboard'); // or /client when built
+          // For new clients, always redirect to quiz first
+          router.push('/quiz');
         }
       } else {
         router.push('/dashboard');

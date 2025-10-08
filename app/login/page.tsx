@@ -9,6 +9,23 @@ import { Input } from '../_components/Input';
 import { Card } from '../_components/Card';
 import { Form } from '../_components/Form';
 
+// Helper function to check if user has completed quiz
+async function checkQuizCompletion(userId: string): Promise<boolean> {
+  try {
+    const { data: session } = await supabase
+      .from('quiz_sessions')
+      .select('status')
+      .eq('user_id', userId)
+      .eq('status', 'completed')
+      .limit(1)
+      .single();
+
+    return Boolean(session);
+  } catch (error) {
+    return false;
+  }
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -42,7 +59,13 @@ export default function LoginPage() {
       } else if (profile?.role === 'admin') {
         router.push('/dashboard'); // or /admin when built
       } else {
-        router.push('/dashboard'); // or /client when built
+        // For clients, check if they've completed the quiz
+        const hasCompletedQuiz = await checkQuizCompletion(data.user.id);
+        if (hasCompletedQuiz) {
+          router.push('/dashboard');
+        } else {
+          router.push('/quiz');
+        }
       }
       
       router.refresh();
