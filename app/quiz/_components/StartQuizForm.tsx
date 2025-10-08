@@ -31,7 +31,7 @@ export function StartQuizForm({ sections }: StartQuizFormProps) {
       } else {
         setError(result.error || 'Failed to start quiz');
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred');
     } finally {
       setIsLoading(false);

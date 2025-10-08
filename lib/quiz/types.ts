@@ -23,7 +23,7 @@ export interface UIProps {
 export interface VisibilityCondition {
   q: string; // question key
   op: 'eq' | 'in' | 'neq' | 'nin';
-  value: any;
+  value: string | string[] | boolean | number;
 }
 
 export interface VisibleIf {

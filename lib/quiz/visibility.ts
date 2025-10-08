@@ -1,4 +1,4 @@
-import { VisibleIf, VisibilityCondition, AnswersMap } from './types';
+import { VisibleIf, VisibilityCondition, AnswersMap, QuizValue } from './types';
 
 /**
  * Checks if a section or question should be visible based on its visibility rules
@@ -52,7 +52,7 @@ function evaluateCondition(
   }
 
   // Extract the actual value(s) from the answer
-  let actualValue: any;
+  let actualValue: string | string[] | boolean | number;
 
   if ('value' in answer) {
     actualValue = answer.value;
@@ -73,21 +73,21 @@ function evaluateCondition(
     case 'in':
       // For single value, check if it's in the target array
       if (!Array.isArray(actualValue)) {
-        return Array.isArray(targetValue) && targetValue.includes(actualValue);
+        return Array.isArray(targetValue) && targetValue.includes(String(actualValue));
       }
       // For array values (multi-choice), check if any value is in target array
       return actualValue.some((v: string) =>
-        Array.isArray(targetValue) ? targetValue.includes(v) : v === targetValue
+        Array.isArray(targetValue) ? targetValue.includes(v) : v === String(targetValue)
       );
 
     case 'nin':
       // For single value, check if it's NOT in the target array
       if (!Array.isArray(actualValue)) {
-        return !(Array.isArray(targetValue) && targetValue.includes(actualValue));
+        return !(Array.isArray(targetValue) && targetValue.includes(String(actualValue)));
       }
       // For array values, check if NO value is in target array
       return !actualValue.some((v: string) =>
-        Array.isArray(targetValue) ? targetValue.includes(v) : v === targetValue
+        Array.isArray(targetValue) ? targetValue.includes(v) : v === String(targetValue)
       );
 
     default:
@@ -100,7 +100,7 @@ function evaluateCondition(
  * Builds an answers map from quiz responses
  */
 export function buildAnswersMap(
-  responses: Array<{ question_id: string; value: any }>,
+  responses: Array<{ question_id: string; value: QuizValue }>,
   questions: Array<{ id: string; key: string }>
 ): AnswersMap {
   const questionIdToKey = new Map(questions.map((q) => [q.id, q.key]));

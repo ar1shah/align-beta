@@ -29,15 +29,18 @@ export default async function QuizPage() {
     .order('sort_order', { ascending: true });
 
   // Sort questions and options
-  const sortedSections: QuizSection[] = (sections || []).map((section) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sortedSections: QuizSection[] = (sections || []).map((section: any) => ({
     ...section,
     quiz_questions: (section.quiz_questions || [])
-      .sort((a, b) => a.sort_order - b.sort_order)
-      .map((question) => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .sort((a: any, b: any) => (a?.sort_order || 0) - (b?.sort_order || 0))
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((question: any) => ({
         ...question,
-        quiz_options: (question.quiz_options || []).sort(
-          (a, b) => a.sort_order - b.sort_order
-        ),
+        quiz_options: (question.quiz_options || [])
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .sort((a: any, b: any) => (a?.sort_order || 0) - (b?.sort_order || 0)),
       })),
   }));
 
@@ -91,7 +94,7 @@ export default async function QuizPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Let's find your perfect match
+              Let&apos;s find your perfect match
             </h1>
             <p className="text-lg text-gray-600">
               Take our quick 2-3 minute quiz to get matched with the right realtor for
@@ -109,7 +112,7 @@ export default async function QuizPage() {
                   Quick & Easy
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Most questions are multiple choice. Skip what you don't know.
+                  Most questions are multiple choice. Skip what you don&apos;t know.
                 </p>
               </div>
             </div>

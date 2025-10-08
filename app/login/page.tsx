@@ -21,7 +21,7 @@ async function checkQuizCompletion(userId: string): Promise<boolean> {
       .single();
 
     return Boolean(session);
-  } catch (error) {
+  } catch {
     return false;
   }
 }
