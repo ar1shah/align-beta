@@ -64,6 +64,27 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Protect /admin routes - admin role only
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    if (!session) {
+      const redirectUrl = new URL('/login', request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    // Check if user has admin role
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single();
+
+    if (profile?.role !== 'admin') {
+      // Redirect non-admins to dashboard
+      const redirectUrl = new URL('/dashboard', request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
   return response;
 }
 

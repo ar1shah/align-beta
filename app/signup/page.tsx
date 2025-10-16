@@ -35,7 +35,15 @@ export default function SignUpPage() {
         },
       });
 
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        // Check if user already exists
+        if (signUpError.message.toLowerCase().includes('already') || 
+            signUpError.message.toLowerCase().includes('exist')) {
+          setError('An account with this email already exists. Please log in instead.');
+          return;
+        }
+        throw signUpError;
+      }
 
       // Redirect to OTP verification
       router.push(`/verify-otp?email=${encodeURIComponent(email)}`);

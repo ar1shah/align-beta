@@ -57,7 +57,7 @@ export default function LoginPage() {
       if (profile?.role === 'realtor') {
         router.push('/realtor');
       } else if (profile?.role === 'admin') {
-        router.push('/dashboard'); // or /admin when built
+        router.push('/admin');
       } else {
         // For clients, check if they've completed the quiz
         const hasCompletedQuiz = await checkQuizCompletion(data.user.id);
