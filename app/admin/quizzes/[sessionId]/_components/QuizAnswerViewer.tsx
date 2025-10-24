@@ -3,11 +3,21 @@
 import { QuizResponse } from '@/lib/db/admin';
 
 interface QuizAnswerViewerProps {
-  responses: (QuizResponse & { question?: any })[];
+  responses: Array<{
+    id: string;
+    question_id: string;
+    value: Record<string, unknown>;
+    created_at: string;
+    question?: {
+      prompt?: string;
+      type?: string;
+      help_text?: string;
+    };
+  }>;
 }
 
 export function QuizAnswerViewer({ responses }: QuizAnswerViewerProps) {
-  const formatValue = (value: any, questionType?: string) => {
+  const formatValue = (value: Record<string, unknown>, questionType?: string) => {
     if (!value) return 'No answer';
 
     // Handle different value structures
@@ -47,7 +57,7 @@ export function QuizAnswerViewer({ responses }: QuizAnswerViewerProps) {
 
   return (
     <div className="space-y-6">
-      {responses.map((response: any, index) => {
+      {responses.map((response, index) => {
         const question = response.question;
         const questionType = question?.type;
 

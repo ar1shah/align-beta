@@ -1,6 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { redirect } from 'next/navigation';
-import { QuizSection, QuizQuestion, QuizResponse } from '@/lib/quiz/types';
+import { QuizSection, QuizResponse } from '@/lib/quiz/types';
 import { isVisible, buildAnswersMap } from '@/lib/quiz/visibility';
 import { SectionForm } from '../_components/SectionForm';
 
@@ -116,10 +116,6 @@ export default async function SectionPage({ params }: SectionPageProps) {
   );
 
   const prevSection = currentIndex > 0 ? sortedSections[currentIndex - 1] : null;
-  const nextSection =
-    currentIndex < sortedSections.length - 1
-      ? sortedSections[currentIndex + 1]
-      : null;
 
   // Find next visible section
   let nextVisibleSection = null;

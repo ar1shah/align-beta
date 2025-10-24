@@ -1,7 +1,6 @@
 import Link from 'next/link';
-import { Search, UserPlus } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import { getAllClients, getAllRealtors } from '@/lib/db/admin';
-import { StatusBadge } from '../_components/StatusBadge';
 import { ExportButton } from '../_components/ExportButton';
 import { ClientsTableClient } from './_components/ClientsTableClient';
 

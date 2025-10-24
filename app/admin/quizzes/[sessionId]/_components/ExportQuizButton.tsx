@@ -4,12 +4,18 @@ import { Download } from 'lucide-react';
 
 interface ExportQuizButtonProps {
   sessionId: string;
-  responses: any[];
+  responses: Array<{
+    question?: {
+      prompt?: string;
+      type?: string;
+    };
+    value: Record<string, unknown>;
+  }>;
 }
 
 export function ExportQuizButton({ sessionId, responses }: ExportQuizButtonProps) {
   const handleExport = () => {
-    const data = responses.map((r: any) => ({
+    const data = responses.map((r) => ({
       question: r.question?.prompt || 'Unknown',
       answer: JSON.stringify(r.value),
       type: r.question?.type,
