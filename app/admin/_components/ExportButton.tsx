@@ -3,13 +3,13 @@
 import { Download } from 'lucide-react';
 import { Button } from '@/app/_components/Button';
 
-interface ExportButtonProps<T = Record<string, unknown>> {
+interface ExportButtonProps<T extends Record<string, unknown> = Record<string, unknown>> {
   data: T[];
   filename: string;
   label?: string;
 }
 
-export function ExportButton<T = Record<string, unknown>>({ data, filename, label = 'Export CSV' }: ExportButtonProps<T>) {
+export function ExportButton<T extends Record<string, unknown> = Record<string, unknown>>({ data, filename, label = 'Export CSV' }: ExportButtonProps<T>) {
   const handleExport = () => {
     if (data.length === 0) {
       alert('No data to export');
