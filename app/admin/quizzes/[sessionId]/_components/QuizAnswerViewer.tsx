@@ -91,11 +91,11 @@ export function QuizAnswerViewer({ responses }: QuizAnswerViewerProps) {
                       <p className="whitespace-pre-wrap">{formatValue(response.value, questionType)}</p>
                     ) : questionType === 'address' ? (
                       <div className="space-y-1">
-                        {response.value.line1 && <p>{response.value.line1}</p>}
-                        {response.value.line2 && <p>{response.value.line2}</p>}
-                        {(response.value.city || response.value.state || response.value.postal_code) && (
+                        {(response.value as any).line1 && <p>{(response.value as any).line1}</p>}
+                        {(response.value as any).line2 && <p>{(response.value as any).line2}</p>}
+                        {((response.value as any).city || (response.value as any).state || (response.value as any).postal_code) && (
                           <p>
-                            {[response.value.city, response.value.state, response.value.postal_code]
+                            {[(response.value as any).city, (response.value as any).state, (response.value as any).postal_code]
                               .filter(Boolean)
                               .join(', ')}
                           </p>
