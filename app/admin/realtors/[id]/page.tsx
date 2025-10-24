@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Mail, Phone, Calendar, CheckCircle, Users } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, Calendar, CheckCircle } from 'lucide-react';
 import { getRealtorWithClients } from '@/lib/db/admin';
 import { StatusBadge } from '../../_components/StatusBadge';
 import { RealtorDetailClient } from './_components/RealtorDetailClient';

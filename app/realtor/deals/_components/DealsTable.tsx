@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Deal } from '@/lib/db/deals';
-import { PlusIcon, MapPinIcon, DollarSignIcon } from 'lucide-react';
+import { PlusIcon, DollarSignIcon } from 'lucide-react';
 import { CreateDealModal } from './CreateDealModal';
 
 interface DealsTableProps {

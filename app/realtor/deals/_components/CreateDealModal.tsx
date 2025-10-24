@@ -39,7 +39,7 @@ export function CreateDealModal({ realtorId, onClose }: CreateDealModalProps) {
 
       router.refresh();
       onClose();
-    } catch (error) {
+    } catch {
       alert('Failed to create deal');
     } finally {
       setLoading(false);

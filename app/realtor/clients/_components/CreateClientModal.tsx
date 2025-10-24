@@ -42,7 +42,7 @@ export function CreateClientModal({
 
       router.refresh();
       onClose();
-    } catch (error) {
+    } catch {
       alert('Failed to create client');
     } finally {
       setLoading(false);

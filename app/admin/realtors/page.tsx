@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { UserPlus, CheckCircle, XCircle } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import { getAllRealtors } from '@/lib/db/admin';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { ExportButton } from '../_components/ExportButton';

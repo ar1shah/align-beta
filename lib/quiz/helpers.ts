@@ -16,7 +16,7 @@ export async function hasUserCompletedQuiz(userId: string): Promise<boolean> {
       .single();
 
     return Boolean(session);
-  } catch {
+  } catch (error) {
     // If no session exists or any error, consider quiz not completed
     return false;
   }
@@ -38,7 +38,7 @@ export async function getCurrentQuizSession(userId: string) {
       .single();
 
     return session;
-  } catch {
+  } catch (error) {
     return null;
   }
 }

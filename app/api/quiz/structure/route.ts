@@ -33,18 +33,15 @@ export async function GET() {
     }
 
     // Sort questions and options
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sortedSections: QuizSection[] = (sections || []).map((section: any) => ({
+    const sortedSections: QuizSection[] = (sections || []).map((section) => ({
       ...section,
       quiz_questions: (section.quiz_questions || [])
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .sort((a: any, b: any) => (a?.sort_order || 0) - (b?.sort_order || 0))
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .map((question: any) => ({
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((question) => ({
           ...question,
-          quiz_options: (question.quiz_options || [])
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .sort((a: any, b: any) => (a?.sort_order || 0) - (b?.sort_order || 0)),
+          quiz_options: (question.quiz_options || []).sort(
+            (a, b) => a.sort_order - b.sort_order
+          ),
         })),
     }));
 

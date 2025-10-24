@@ -49,7 +49,7 @@ export function CreateAppointmentModal({
 
       router.refresh();
       onClose();
-    } catch (error) {
+    } catch {
       alert('Failed to create appointment');
     } finally {
       setLoading(false);

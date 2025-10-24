@@ -49,12 +49,12 @@ export default async function QuizCompletePage() {
 
           {/* Heading */}
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            You&apos;re all set!
+            You're all set!
           </h1>
-            <p className="text-xl text-gray-600 mb-8">
-              Thank you for completing the quiz. We&apos;re now matching you with the perfect
-              realtor.
-            </p>
+          <p className="text-xl text-gray-600 mb-8">
+            Thank you for completing the quiz. We're now matching you with the perfect
+            realtor.
+          </p>
 
           {/* Summary card */}
           <div className="bg-primary-50 rounded-xl p-6 mb-8">
@@ -99,7 +99,7 @@ export default async function QuizCompletePage() {
                 </div>
                 <div>
                   <p className="text-gray-700">
-                    You&apos;ll receive an email within 24 hours with your top 3 realtor
+                    You'll receive an email within 24 hours with your top 3 realtor
                     matches.
                   </p>
                 </div>

@@ -1,6 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { redirect } from 'next/navigation';
-import { QuizSection, QuizResponse } from '@/lib/quiz/types';
+import { QuizSection, QuizQuestion, QuizResponse } from '@/lib/quiz/types';
 import { isVisible, buildAnswersMap } from '@/lib/quiz/visibility';
 import { SectionForm } from '../_components/SectionForm';
 
@@ -35,18 +35,15 @@ export default async function SectionPage({ params }: SectionPageProps) {
     .order('sort_order', { ascending: true });
 
   // Sort questions and options
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sortedSections: QuizSection[] = (sections || []).map((section: any) => ({
+  const sortedSections: QuizSection[] = (sections || []).map((section) => ({
     ...section,
     quiz_questions: (section.quiz_questions || [])
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .sort((a: any, b: any) => (a?.sort_order || 0) - (b?.sort_order || 0))
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((question: any) => ({
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((question) => ({
         ...question,
-        quiz_options: (question.quiz_options || [])
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .sort((a: any, b: any) => (a?.sort_order || 0) - (b?.sort_order || 0)),
+        quiz_options: (question.quiz_options || []).sort(
+          (a, b) => a.sort_order - b.sort_order
+        ),
       })),
   }));
 
@@ -119,6 +116,10 @@ export default async function SectionPage({ params }: SectionPageProps) {
   );
 
   const prevSection = currentIndex > 0 ? sortedSections[currentIndex - 1] : null;
+  const nextSection =
+    currentIndex < sortedSections.length - 1
+      ? sortedSections[currentIndex + 1]
+      : null;
 
   // Find next visible section
   let nextVisibleSection = null;

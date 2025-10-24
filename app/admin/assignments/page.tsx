@@ -163,7 +163,7 @@ export default async function AssignmentsPage() {
                   </td>
                 </tr>
               ) : (
-                assignments.map((assignment: any) => (
+                assignments.map((assignment) => (
                   <tr key={assignment.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <Link
