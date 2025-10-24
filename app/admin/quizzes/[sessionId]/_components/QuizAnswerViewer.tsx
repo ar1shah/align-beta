@@ -1,7 +1,5 @@
 'use client';
 
-import { QuizResponse } from '@/lib/db/admin';
-
 interface QuizAnswerViewerProps {
   responses: Array<{
     id: string;

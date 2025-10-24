@@ -1,4 +1,3 @@
-import { ShieldAlertIcon } from 'lucide-react';
 import { getAuditLogs } from '@/lib/db/admin';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { AuditLogClient } from './_components/AuditLogClient';

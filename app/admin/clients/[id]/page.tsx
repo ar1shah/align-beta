@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Mail, Phone, Calendar, Tag, FileText, UserPlus, UserMinus } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, Calendar, Tag, FileText } from 'lucide-react';
 import { 
   getClientWithAssignment, 
   getClientQuizSessions, 

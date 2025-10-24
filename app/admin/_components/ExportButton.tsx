@@ -3,13 +3,13 @@
 import { Download } from 'lucide-react';
 import { Button } from '@/app/_components/Button';
 
-interface ExportButtonProps<T extends Record<string, unknown> = Record<string, unknown>> {
+interface ExportButtonProps<T = Record<string, unknown>> {
   data: T[];
   filename: string;
   label?: string;
 }
 
-export function ExportButton<T extends Record<string, unknown> = Record<string, unknown>>({ data, filename, label = 'Export CSV' }: ExportButtonProps<T>) {
+export function ExportButton<T = Record<string, unknown>>({ data, filename, label = 'Export CSV' }: ExportButtonProps<T>) {
   const handleExport = () => {
     if (data.length === 0) {
       alert('No data to export');
@@ -17,7 +17,7 @@ export function ExportButton<T extends Record<string, unknown> = Record<string, 
     }
 
     // Get headers from first object
-    const headers = Object.keys(data[0]);
+    const headers = Object.keys(data[0] as Record<string, unknown>);
 
     // Convert to CSV
     const csv = [
@@ -25,7 +25,7 @@ export function ExportButton<T extends Record<string, unknown> = Record<string, 
       ...data.map((row) =>
         headers
           .map((header) => {
-            const value = row[header];
+            const value = (row as Record<string, unknown>)[header];
             // Handle nulls, arrays, objects
             if (value === null || value === undefined) return '';
             if (Array.isArray(value)) return `"${value.join(', ')}"`;

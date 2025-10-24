@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Search, Filter } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { AuditLog } from '@/lib/db/admin';
 
 interface AuditLogWithActor extends AuditLog {
