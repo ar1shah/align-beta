@@ -91,7 +91,7 @@ export default async function QuizPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Let's find your perfect match
+              Let&apos;s find your perfect match
             </h1>
             <p className="text-lg text-gray-600">
               Take our quick 2-3 minute quiz to get matched with the right realtor for
@@ -109,7 +109,7 @@ export default async function QuizPage() {
                   Quick & Easy
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Most questions are multiple choice. Skip what you don't know.
+                  Most questions are multiple choice. Skip what you don&apos;t know.
                 </p>
               </div>
             </div>

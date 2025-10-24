@@ -1,4 +1,4 @@
-import { VisibleIf, VisibilityCondition, AnswersMap } from './types';
+import { VisibleIf, VisibilityCondition, AnswersMap, QuizValue } from './types';
 
 /**
  * Checks if a section or question should be visible based on its visibility rules
@@ -52,7 +52,7 @@ function evaluateCondition(
   }
 
   // Extract the actual value(s) from the answer
-  let actualValue: any;
+  let actualValue: string | number | boolean | string[];
 
   if ('value' in answer) {
     actualValue = answer.value;
@@ -100,7 +100,7 @@ function evaluateCondition(
  * Builds an answers map from quiz responses
  */
 export function buildAnswersMap(
-  responses: Array<{ question_id: string; value: any }>,
+  responses: Array<{ question_id: string; value: QuizValue }>,
   questions: Array<{ id: string; key: string }>
 ): AnswersMap {
   const questionIdToKey = new Map(questions.map((q) => [q.id, q.key]));
