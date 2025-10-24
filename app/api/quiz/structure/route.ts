@@ -36,11 +36,11 @@ export async function GET() {
     const sortedSections: QuizSection[] = (sections || []).map((section) => ({
       ...section,
       quiz_questions: (section.quiz_questions || [])
-        .sort((a, b) => a.sort_order - b.sort_order)
-        .map((question) => ({
+        .sort((a: any, b: any) => a.sort_order - b.sort_order)
+        .map((question: any) => ({
           ...question,
           quiz_options: (question.quiz_options || []).sort(
-            (a, b) => a.sort_order - b.sort_order
+            (a: any, b: any) => a.sort_order - b.sort_order
           ),
         })),
     }));
