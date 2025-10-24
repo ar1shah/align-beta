@@ -1,5 +1,13 @@
 'use client';
 
+interface AddressValue {
+  line1?: string;
+  line2?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+}
+
 interface QuizAnswerViewerProps {
   responses: Array<{
     id: string;
@@ -91,11 +99,11 @@ export function QuizAnswerViewer({ responses }: QuizAnswerViewerProps) {
                       <p className="whitespace-pre-wrap">{formatValue(response.value, questionType)}</p>
                     ) : questionType === 'address' ? (
                       <div className="space-y-1">
-                        {(response.value as any).line1 && <p>{(response.value as any).line1}</p>}
-                        {(response.value as any).line2 && <p>{(response.value as any).line2}</p>}
-                        {((response.value as any).city || (response.value as any).state || (response.value as any).postal_code) && (
+                        {(response.value as AddressValue).line1 && <p>{(response.value as AddressValue).line1}</p>}
+                        {(response.value as AddressValue).line2 && <p>{(response.value as AddressValue).line2}</p>}
+                        {((response.value as AddressValue).city || (response.value as AddressValue).state || (response.value as AddressValue).postal_code) && (
                           <p>
-                            {[(response.value as any).city, (response.value as any).state, (response.value as any).postal_code]
+                            {[(response.value as AddressValue).city, (response.value as AddressValue).state, (response.value as AddressValue).postal_code]
                               .filter(Boolean)
                               .join(', ')}
                           </p>
