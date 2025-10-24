@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { UserPlus } from 'lucide-react';
-import { getAllClients, getAllRealtors } from '@/lib/db/admin';
+import { getAllClients, getAllRealtors, Client } from '@/lib/db/admin';
 import { ExportButton } from '../_components/ExportButton';
 import { ClientsTableClient } from './_components/ClientsTableClient';
 
@@ -19,7 +19,7 @@ export default async function ClientsPage() {
           <p className="text-gray-500 mt-1">Manage all clients in the system</p>
         </div>
         <div className="flex gap-3">
-          <ExportButton data={clients} filename="clients" />
+          <ExportButton<Client> data={clients} filename="clients" />
           <Link
             href="/admin/clients/new"
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
