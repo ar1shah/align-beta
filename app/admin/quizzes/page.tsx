@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { FileText, ExternalLink } from 'lucide-react';
-import { getAllQuizSessions } from '@/lib/db/admin';
+import { FileText, ExternalLink, AlertCircle } from 'lucide-react';
+import { getAllQuizSessions, QuizSubmission } from '@/lib/db/admin';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { StatusBadge } from '../_components/StatusBadge';
 import { ExportButton } from '../_components/ExportButton';
@@ -8,25 +8,58 @@ import { ExportButton } from '../_components/ExportButton';
 export const dynamic = 'force-dynamic';
 
 export default async function QuizzesPage() {
-  const sessions = await getAllQuizSessions();
-  const supabase = await createServerSupabaseClient();
+  let sessions: QuizSubmission[] = [];
+  let error: string | null = null;
+  let profileMap = new Map<string, string | null>();
+  let clientMap = new Map<string, { user_id: string; id: string; full_name: string | null; email: string | null }>();
 
-  // Get user info for sessions
-  const userIds = [...new Set(sessions.map((s) => s.user_id))];
-  const { data: profiles } = await supabase
-    .from('profiles')
-    .select('id, full_name')
-    .in('id', userIds);
+  try {
+    sessions = await getAllQuizSessions();
+    const supabase = await createServerSupabaseClient();
 
-  const profileMap = new Map(profiles?.map((p) => [p.id, p.full_name]) || []);
+    // Get user info for sessions
+    const userIds = [...new Set(sessions.map((s) => s.user_id))];
+    
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', userIds);
 
-  // Get clients for sessions
-  const { data: clients } = await supabase
-    .from('clients')
-    .select('user_id, id, full_name, email')
-    .in('user_id', userIds);
+      profileMap = new Map(profiles?.map((p) => [p.id, p.full_name]) || []);
 
-  const clientMap = new Map(clients?.map((c) => [c.user_id, c]) || []);
+      // Get clients for sessions
+      const { data: clients } = await supabase
+        .from('clients')
+        .select('user_id, id, full_name, email')
+        .in('user_id', userIds);
+
+      clientMap = new Map(clients?.map((c) => [c.user_id!, c]) || []);
+    }
+  } catch (err) {
+    console.error('Error loading quizzes page:', err);
+    error = 'Failed to load quiz data. Please try refreshing the page.';
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Quiz Submissions</h1>
+          <p className="text-gray-500 mt-1">Browse and review client quiz responses</p>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+            <div>
+              <h3 className="font-medium text-red-800">Error Loading Data</h3>
+              <p className="text-sm text-red-600 mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const sessionsWithUser = sessions.map((s) => ({
     ...s,

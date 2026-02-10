@@ -5,6 +5,7 @@ import { Button } from '@/app/_components/Button';
 import { startQuizSession } from '../_actions';
 import { useRouter } from 'next/navigation';
 import { QuizSection } from '@/lib/quiz/types';
+import { Loader2, ArrowRight, AlertCircle } from 'lucide-react';
 
 interface StartQuizFormProps {
   sections: QuizSection[];
@@ -39,21 +40,36 @@ export function StartQuizForm({ sections }: StartQuizFormProps) {
   };
 
   return (
-    <div>
+    <div className="space-y-4">
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
-          {error}
+        <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-xl text-destructive flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+          <span className="text-sm">{error}</span>
         </div>
       )}
       <Button
         fullWidth
+        variant="brand"
         onClick={handleStart}
         disabled={isLoading}
-        className="text-lg py-4"
+        size="xl"
+        className="group"
       >
-        {isLoading ? 'Starting...' : 'Start Quiz'}
+        {isLoading ? (
+          <>
+            <Loader2 className="w-5 h-5 animate-spin" />
+            Starting...
+          </>
+        ) : (
+          <>
+            Start Quiz
+            <ArrowRight className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" />
+          </>
+        )}
       </Button>
+      <p className="text-center text-xs text-muted-foreground">
+        Takes about 2-3 minutes to complete
+      </p>
     </div>
   );
 }
-

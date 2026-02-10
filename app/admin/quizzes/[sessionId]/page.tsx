@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { ArrowLeft, FileText } from 'lucide-react';
-import { getQuizSessionWithResponses } from '@/lib/db/admin';
+import { notFound } from 'next/navigation';
+import { ArrowLeft, FileText, AlertCircle } from 'lucide-react';
+import { getQuizSessionWithResponses, QuizSubmission, Client } from '@/lib/db/admin';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { StatusBadge } from '../../_components/StatusBadge';
 import { QuizAnswerViewer } from './_components/QuizAnswerViewer';
@@ -14,23 +15,71 @@ interface QuizDetailPageProps {
 
 export default async function QuizDetailPage({ params }: QuizDetailPageProps) {
   const { sessionId } = await params;
-  const { session, responses } = await getQuizSessionWithResponses(sessionId);
   
-  const supabase = await createServerSupabaseClient();
-  
-  // Get user info
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name')
-    .eq('id', session.user_id)
-    .single();
+  let session: QuizSubmission | null = null;
+  let responses: Awaited<ReturnType<typeof getQuizSessionWithResponses>>['responses'] = [];
+  let profile: { full_name: string | null } | null = null;
+  let client: Client | null = null;
+  let error: string | null = null;
 
-  // Get client info if exists
-  const { data: client } = await supabase
-    .from('clients')
-    .select('*')
-    .eq('user_id', session.user_id)
-    .single();
+  try {
+    const result = await getQuizSessionWithResponses(sessionId);
+    session = result.session;
+    responses = result.responses;
+    
+    const supabase = await createServerSupabaseClient();
+    
+    // Get user info
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', session.user_id)
+      .single();
+    profile = profileData;
+
+    // Get client info if exists
+    const { data: clientData } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('user_id', session.user_id)
+      .single();
+    client = clientData;
+  } catch (err) {
+    console.error('Error loading quiz detail:', err);
+    // Check if it's a "not found" error
+    if (err instanceof Error && err.message.includes('No rows')) {
+      notFound();
+    }
+    error = 'Failed to load quiz data. Please try again.';
+  }
+
+  if (!session) {
+    notFound();
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Link href="/admin/quizzes" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Quiz Submission</h1>
+          </div>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+            <div>
+              <h3 className="font-medium text-red-800">Error Loading Data</h3>
+              <p className="text-sm text-red-600 mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

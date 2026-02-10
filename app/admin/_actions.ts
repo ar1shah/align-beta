@@ -2,6 +2,17 @@
 
 import { revalidatePath } from 'next/cache';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
+import {
+  getClient,
+  getRealtorWithNotificationSettings,
+  getCurrentAssignmentForClient,
+} from '@/lib/db/admin';
+import {
+  sendMatchNotification,
+  sendNewLeadNotification,
+  sendReassignmentClientNotification,
+  sendReassignmentRealtorNotification,
+} from '@/lib/email';
 
 // ==========================================
 // ASSIGNMENT ACTIONS
@@ -15,6 +26,10 @@ export async function assignClientToRealtor(
   try {
     const supabase = await createServerSupabaseClient();
 
+    // Check if client already has an active assignment (for reassignment detection)
+    const existingAssignment = await getCurrentAssignmentForClient(clientId);
+    const isReassignment = existingAssignment !== null;
+
     const { error } = await supabase.rpc('assign_client_to_realtor', {
       p_client_id: clientId,
       p_realtor_id: realtorId,
@@ -23,12 +38,25 @@ export async function assignClientToRealtor(
 
     if (error) throw error;
 
+    // Revalidate admin pages
     revalidatePath('/admin');
     revalidatePath('/admin/clients');
     revalidatePath('/admin/realtors');
     revalidatePath('/admin/assignments');
     revalidatePath(`/admin/clients/${clientId}`);
     revalidatePath(`/admin/realtors/${realtorId}`);
+    
+    // Revalidate client dashboard (for match display)
+    revalidatePath('/dashboard');
+    
+    // Revalidate realtor dashboard (for new lead display)
+    revalidatePath('/realtor');
+    revalidatePath('/realtor/leads');
+
+    // Send email notifications (async, don't block the response)
+    sendAssignmentNotifications(clientId, realtorId, isReassignment).catch((err) => {
+      console.error('Error sending assignment notifications:', err);
+    });
 
     return { success: true };
   } catch (error) {
@@ -37,6 +65,108 @@ export async function assignClientToRealtor(
       success: false, 
       error: error instanceof Error ? error.message : 'Failed to assign client' 
     };
+  }
+}
+
+// ==========================================
+// EMAIL NOTIFICATION HELPER
+// ==========================================
+
+async function sendAssignmentNotifications(
+  clientId: string,
+  realtorId: string,
+  isReassignment: boolean
+) {
+  try {
+    // Fetch client and realtor details
+    const [client, realtor] = await Promise.all([
+      getClient(clientId),
+      getRealtorWithNotificationSettings(realtorId),
+    ]);
+
+    if (!client) {
+      console.warn(`sendAssignmentNotifications: Client ${clientId} not found`);
+      return;
+    }
+
+    if (!realtor) {
+      console.warn(`sendAssignmentNotifications: Realtor ${realtorId} not found`);
+      return;
+    }
+
+    // Get lead data for the realtor notification (created by the RPC function)
+    const supabase = await createServerSupabaseClient();
+    let leadDetails: {
+      buyer_or_seller: string | null;
+      price_target: number | null;
+      area_pref: string | null;
+    } | null = null;
+
+    if (realtor.user_id && client.user_id) {
+      const { data: lead } = await supabase
+        .from('leads')
+        .select('buyer_or_seller, price_target, area_pref')
+        .eq('assigned_realtor_id', realtor.user_id)
+        .eq('created_by_client_id', client.user_id)
+        .single();
+      
+      leadDetails = lead;
+    }
+
+    // Send notifications based on whether this is a new assignment or reassignment
+    if (isReassignment) {
+      // Send reassignment notification to client
+      if (client.email) {
+        await sendReassignmentClientNotification({
+          clientEmail: client.email,
+          clientName: client.full_name || 'there',
+          newRealtorName: realtor.full_name || 'Your New Agent',
+          newRealtorEmail: realtor.email || '',
+          newRealtorPhone: realtor.phone,
+        });
+      }
+
+      // Send reassignment notification to new realtor (if notifications enabled)
+      if (realtor.email && realtor.new_lead_alerts) {
+        await sendReassignmentRealtorNotification({
+          realtorEmail: realtor.email,
+          realtorName: realtor.full_name || 'there',
+          clientName: client.full_name || 'Unknown Client',
+          clientEmail: client.email,
+          clientPhone: client.phone,
+        });
+      }
+    } else {
+      // New assignment - send match notification to client
+      if (client.email) {
+        await sendMatchNotification({
+          clientEmail: client.email,
+          clientName: client.full_name || 'there',
+          realtorName: realtor.full_name || 'Your Agent',
+          realtorEmail: realtor.email || '',
+          realtorPhone: realtor.phone,
+        });
+      }
+
+      // Send new lead notification to realtor (if notifications enabled)
+      if (realtor.email && realtor.new_lead_alerts) {
+        await sendNewLeadNotification({
+          realtorEmail: realtor.email,
+          realtorName: realtor.full_name || 'there',
+          clientName: client.full_name || 'Unknown Client',
+          clientEmail: client.email,
+          clientPhone: client.phone,
+          buyerOrSeller: leadDetails?.buyer_or_seller || null,
+          priceTarget: leadDetails?.price_target || null,
+          areaPref: leadDetails?.area_pref || null,
+        });
+      }
+    }
+
+    console.log(`Assignment notifications sent for client ${clientId} to realtor ${realtorId} (reassignment: ${isReassignment})`);
+  } catch (err) {
+    console.error('sendAssignmentNotifications error:', err);
+    // Don't throw - let the assignment succeed even if notifications fail
   }
 }
 
@@ -51,11 +181,19 @@ export async function unassignClient(clientId: string, reason: string) {
 
     if (error) throw error;
 
+    // Revalidate admin pages
     revalidatePath('/admin');
     revalidatePath('/admin/clients');
     revalidatePath('/admin/realtors');
     revalidatePath('/admin/assignments');
     revalidatePath(`/admin/clients/${clientId}`);
+    
+    // Revalidate client dashboard (match may no longer exist)
+    revalidatePath('/dashboard');
+    
+    // Revalidate realtor dashboard (lead may be removed/updated)
+    revalidatePath('/realtor');
+    revalidatePath('/realtor/leads');
 
     return { success: true };
   } catch (error) {

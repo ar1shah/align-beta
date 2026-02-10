@@ -38,11 +38,11 @@ export default async function SectionPage({ params }: SectionPageProps) {
   const sortedSections: QuizSection[] = (sections || []).map((section) => ({
     ...section,
     quiz_questions: (section.quiz_questions || [])
-      .sort((a, b) => a.sort_order - b.sort_order)
-      .map((question) => ({
+      .sort((a: { sort_order: number }, b: { sort_order: number }) => a.sort_order - b.sort_order)
+      .map((question: { quiz_options?: { sort_order: number }[]; [key: string]: unknown }) => ({
         ...question,
         quiz_options: (question.quiz_options || []).sort(
-          (a, b) => a.sort_order - b.sort_order
+          (a: { sort_order: number }, b: { sort_order: number }) => a.sort_order - b.sort_order
         ),
       })),
   }));

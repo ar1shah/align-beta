@@ -1,29 +1,71 @@
+'use client';
+
+import { cn } from '@/lib/utils';
+
 interface StatusBadgeProps {
   status: string;
-  className?: string;
+  size?: 'sm' | 'default';
 }
 
-const statusColors: Record<string, string> = {
-  new: 'bg-blue-100 text-blue-800',
-  qualified: 'bg-green-100 text-green-800',
-  contacted: 'bg-yellow-100 text-yellow-800',
-  assigned: 'bg-purple-100 text-purple-800',
-  active: 'bg-emerald-100 text-emerald-800',
-  closed: 'bg-gray-100 text-gray-800',
-  lost: 'bg-red-100 text-red-800',
-  in_progress: 'bg-blue-100 text-blue-800',
-  completed: 'bg-green-100 text-green-800',
+const statusConfig: Record<string, { bg: string; text: string; dot?: string }> = {
+  // Client statuses
+  new: { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500' },
+  qualified: { bg: 'bg-cyan-50', text: 'text-cyan-700', dot: 'bg-cyan-500' },
+  contacted: { bg: 'bg-indigo-50', text: 'text-indigo-700', dot: 'bg-indigo-500' },
+  assigned: { bg: 'bg-violet-50', text: 'text-violet-700', dot: 'bg-violet-500' },
+  active: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+  closed: { bg: 'bg-slate-100', text: 'text-slate-600', dot: 'bg-slate-400' },
+  lost: { bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500' },
+  
+  // Quiz statuses
+  in_progress: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
+  completed: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+  
+  // Lead stages
+  working: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
+  nurture: { bg: 'bg-purple-50', text: 'text-purple-700', dot: 'bg-purple-500' },
+  client: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+  
+  // Deal stages
+  lead: { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500' },
+  under_contract: { bg: 'bg-violet-50', text: 'text-violet-700', dot: 'bg-violet-500' },
+  
+  // Appointment statuses
+  scheduled: { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500' },
+  confirmed: { bg: 'bg-cyan-50', text: 'text-cyan-700', dot: 'bg-cyan-500' },
+  no_show: { bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500' },
+  
+  // Payout statuses
+  pending: { bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-500' },
+  processing: { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500' },
+  paid: { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+  on_hold: { bg: 'bg-slate-100', text: 'text-slate-600', dot: 'bg-slate-400' },
 };
 
-export function StatusBadge({ status, className = '' }: StatusBadgeProps) {
-  const colorClass = statusColors[status] || 'bg-gray-100 text-gray-800';
+export function StatusBadge({ status, size = 'default' }: StatusBadgeProps) {
+  const config = statusConfig[status] || { 
+    bg: 'bg-slate-100', 
+    text: 'text-slate-600',
+    dot: 'bg-slate-400'
+  };
+  
+  const formattedStatus = status
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass} ${className}`}
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full font-medium transition-all duration-200',
+        config.bg,
+        config.text,
+        size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-xs'
+      )}
     >
-      {status.replace(/_/g, ' ')}
+      {config.dot && (
+        <span className={cn('h-1.5 w-1.5 rounded-full', config.dot)} />
+      )}
+      {formattedStatus}
     </span>
   );
 }
-

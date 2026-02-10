@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { UserPlus } from 'lucide-react';
-import { getAllRealtors } from '@/lib/db/admin';
+import { UserPlus, AlertCircle } from 'lucide-react';
+import { getAllRealtors, Realtor } from '@/lib/db/admin';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { ExportButton } from '../_components/ExportButton';
 import { RealtorsTableClient } from './_components/RealtorsTableClient';
@@ -8,20 +8,54 @@ import { RealtorsTableClient } from './_components/RealtorsTableClient';
 export const dynamic = 'force-dynamic';
 
 export default async function RealtorsPage() {
-  const realtors = await getAllRealtors();
-  const supabase = await createServerSupabaseClient();
-
-  // Get assignment counts for each realtor
-  const { data: assignments } = await supabase
-    .from('client_realtor_assignments')
-    .select('realtor_id')
-    .is('unassigned_at', null);
-
+  let realtors: Realtor[] = [];
+  let error: string | null = null;
   const assignmentCounts = new Map<string, number>();
-  assignments?.forEach((a) => {
-    const count = assignmentCounts.get(a.realtor_id) || 0;
-    assignmentCounts.set(a.realtor_id, count + 1);
-  });
+
+  try {
+    realtors = await getAllRealtors();
+    const supabase = await createServerSupabaseClient();
+
+    // Get assignment counts for each realtor
+    const { data: assignments, error: assignmentError } = await supabase
+      .from('client_realtor_assignments')
+      .select('realtor_id')
+      .is('unassigned_at', null);
+
+    if (assignmentError) {
+      console.error('Error loading assignments:', assignmentError);
+    }
+
+    assignments?.forEach((a) => {
+      if (a.realtor_id) {
+        const count = assignmentCounts.get(a.realtor_id) || 0;
+        assignmentCounts.set(a.realtor_id, count + 1);
+      }
+    });
+  } catch (err) {
+    console.error('Error loading realtors page:', err);
+    error = 'Failed to load realtors data. Please try refreshing the page.';
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Realtors</h1>
+          <p className="text-gray-500 mt-1">Manage realtor capacity and assignments</p>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+            <div>
+              <h3 className="font-medium text-red-800">Error Loading Data</h3>
+              <p className="text-sm text-red-600 mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const realtorsWithCounts = realtors.map((r) => ({
     ...r,

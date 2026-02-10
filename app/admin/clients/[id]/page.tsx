@@ -1,10 +1,14 @@
 import Link from 'next/link';
-import { ArrowLeft, Mail, Phone, Calendar, Tag, FileText } from 'lucide-react';
+import { notFound } from 'next/navigation';
+import { ArrowLeft, Mail, Phone, Calendar, Tag, FileText, AlertCircle } from 'lucide-react';
 import { 
   getClientWithAssignment, 
   getClientQuizSessions, 
   getAssignmentHistory,
-  getAllRealtors 
+  getAllRealtors,
+  Client,
+  Realtor,
+  QuizSubmission
 } from '@/lib/db/admin';
 import { StatusBadge } from '../../_components/StatusBadge';
 import { ClientDetailClient } from './_components/ClientDetailClient';
@@ -17,10 +21,60 @@ interface ClientDetailPageProps {
 
 export default async function ClientDetailPage({ params }: ClientDetailPageProps) {
   const { id } = await params;
-  const { client, assignment } = await getClientWithAssignment(id);
-  const quizSessions = await getClientQuizSessions(id);
-  const assignmentHistory = await getAssignmentHistory(id);
-  const realtors = await getAllRealtors();
+  
+  let client: Client | null = null;
+  let assignment: Awaited<ReturnType<typeof getClientWithAssignment>>['assignment'] = null;
+  let quizSessions: QuizSubmission[] = [];
+  let assignmentHistory: Awaited<ReturnType<typeof getAssignmentHistory>> = [];
+  let realtors: Realtor[] = [];
+  let error: string | null = null;
+
+  try {
+    const result = await getClientWithAssignment(id);
+    client = result.client;
+    assignment = result.assignment;
+    
+    [quizSessions, assignmentHistory, realtors] = await Promise.all([
+      getClientQuizSessions(id),
+      getAssignmentHistory(id),
+      getAllRealtors(),
+    ]);
+  } catch (err) {
+    console.error('Error loading client detail:', err);
+    // Check if it's a "not found" error
+    if (err instanceof Error && err.message.includes('No rows')) {
+      notFound();
+    }
+    error = 'Failed to load client data. Please try again.';
+  }
+
+  if (!client) {
+    notFound();
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Link href="/admin/clients" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Client Details</h1>
+          </div>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+            <div>
+              <h3 className="font-medium text-red-800">Error Loading Data</h3>
+              <p className="text-sm text-red-600 mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

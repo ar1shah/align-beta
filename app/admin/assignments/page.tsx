@@ -1,15 +1,47 @@
 import Link from 'next/link';
-import { Users, TrendingUp } from 'lucide-react';
-import { getAllAssignments, getActiveRealtors, getUnassignedClients } from '@/lib/db/admin';
+import { Users, TrendingUp, AlertCircle } from 'lucide-react';
+import { getAllAssignments, getActiveRealtors, getUnassignedClients, Client, Realtor } from '@/lib/db/admin';
 import { StatusBadge } from '../_components/StatusBadge';
 import { AssignmentsClient } from './_components/AssignmentsClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AssignmentsPage() {
-  const assignments = await getAllAssignments();
-  const realtors = await getActiveRealtors();
-  const unassignedClients = await getUnassignedClients();
+  let assignments: Awaited<ReturnType<typeof getAllAssignments>> = [];
+  let realtors: Realtor[] = [];
+  let unassignedClients: Client[] = [];
+  let error: string | null = null;
+
+  try {
+    [assignments, realtors, unassignedClients] = await Promise.all([
+      getAllAssignments(),
+      getActiveRealtors(),
+      getUnassignedClients(),
+    ]);
+  } catch (err) {
+    console.error('Error loading assignments page:', err);
+    error = 'Failed to load assignment data. Please try refreshing the page.';
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Assignment Management</h1>
+          <p className="text-gray-500 mt-1">Manage client-realtor assignments and load balancing</p>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+            <div>
+              <h3 className="font-medium text-red-800">Error Loading Data</h3>
+              <p className="text-sm text-red-600 mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Calculate realtor load
   const realtorLoad = new Map<string, number>();

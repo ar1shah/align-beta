@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, AlertCircle } from 'lucide-react';
 import { getAllClients, getAllRealtors, Client } from '@/lib/db/admin';
 import { ExportButton } from '../_components/ExportButton';
 import { ClientsTableClient } from './_components/ClientsTableClient';
@@ -7,8 +7,39 @@ import { ClientsTableClient } from './_components/ClientsTableClient';
 export const dynamic = 'force-dynamic';
 
 export default async function ClientsPage() {
-  const clients = await getAllClients();
-  const realtors = await getAllRealtors();
+  let clients: Client[] = [];
+  let realtors: Awaited<ReturnType<typeof getAllRealtors>> = [];
+  let error: string | null = null;
+
+  try {
+    [clients, realtors] = await Promise.all([
+      getAllClients(),
+      getAllRealtors(),
+    ]);
+  } catch (err) {
+    console.error('Error loading clients page:', err);
+    error = 'Failed to load clients data. Please try refreshing the page.';
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Clients</h1>
+          <p className="text-gray-500 mt-1">Manage all clients in the system</p>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+            <div>
+              <h3 className="font-medium text-red-800">Error Loading Data</h3>
+              <p className="text-sm text-red-600 mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

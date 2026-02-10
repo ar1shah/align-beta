@@ -3,6 +3,7 @@
 import { QuizSection } from '@/lib/quiz/types';
 import { CheckCircle2, Circle } from 'lucide-react';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 interface ProgressProps {
   sections: QuizSection[];
@@ -32,18 +33,18 @@ export function Progress({
       {/* Progress bar */}
       <div className="space-y-2">
         <div className="flex justify-between items-center text-sm">
-          <span className="font-medium text-gray-700">Overall Progress</span>
-          <span className="font-semibold text-primary-600">
+          <span className="font-medium text-foreground">Overall Progress</span>
+          <span className="font-semibold text-primary">
             {progressPercent}%
           </span>
         </div>
-        <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+        <div className="w-full h-2.5 bg-muted rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-500 ease-out"
+            className="h-full bg-gradient-brand transition-all duration-500 ease-out rounded-full"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-muted-foreground">
           {totalAnswered} of {totalRequired} required questions answered
         </p>
       </div>
@@ -64,13 +65,14 @@ export function Progress({
             <Link
               key={section.key}
               href={`/quiz/${section.key}`}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={cn(
+                'inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
                 isCurrent
-                  ? 'bg-primary-600 text-white shadow-md'
+                  ? 'bg-gradient-brand text-white shadow-md shadow-brand-500/25'
                   : isComplete
-                  ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+                  ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                  : 'bg-muted text-muted-foreground hover:bg-accent hover:text-foreground'
+              )}
             >
               {isComplete ? (
                 <CheckCircle2 className="w-4 h-4" />
@@ -78,7 +80,7 @@ export function Progress({
                 <Circle className="w-4 h-4" />
               )}
               <span>{section.title}</span>
-              {!section.is_optional && (
+              {!section.is_optional && !isComplete && (
                 <span className="text-xs opacity-75">(required)</span>
               )}
             </Link>
@@ -88,4 +90,3 @@ export function Progress({
     </div>
   );
 }
-

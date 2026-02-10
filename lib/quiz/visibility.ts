@@ -73,7 +73,7 @@ function evaluateCondition(
     case 'in':
       // For single value, check if it's in the target array
       if (!Array.isArray(actualValue)) {
-        return Array.isArray(targetValue) && targetValue.includes(actualValue);
+        return Array.isArray(targetValue) && targetValue.includes(String(actualValue));
       }
       // For array values (multi-choice), check if any value is in target array
       return actualValue.some((v: string) =>
@@ -83,7 +83,7 @@ function evaluateCondition(
     case 'nin':
       // For single value, check if it's NOT in the target array
       if (!Array.isArray(actualValue)) {
-        return !(Array.isArray(targetValue) && targetValue.includes(actualValue));
+        return !(Array.isArray(targetValue) && targetValue.includes(String(actualValue)));
       }
       // For array values, check if NO value is in target array
       return !actualValue.some((v: string) =>

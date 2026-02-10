@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import {
@@ -13,6 +14,8 @@ import {
   CheckCircleIcon,
   LogOutIcon,
 } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 
 export default async function RealtorLayout({
   children,
@@ -52,43 +55,66 @@ export default async function RealtorLayout({
   ];
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-6 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-900">Align</h1>
-          <p className="text-sm text-gray-500 mt-1">Realtor Dashboard</p>
+      <aside className="w-64 bg-white/80 backdrop-blur-xl border-r border-border/50 flex flex-col shadow-soft">
+        {/* Logo Section */}
+        <div className="p-6 border-b border-border/50">
+          <Link href="/realtor" className="flex items-center gap-3 group">
+            <div className="relative w-10 h-10 flex items-center justify-center">
+              <Image 
+                src="/bluelogo.svg" 
+                alt="Align" 
+                width={40} 
+                height={40}
+                className="transition-transform duration-200 group-hover:scale-105"
+              />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold gradient-text">Align</h1>
+              <p className="text-xs text-muted-foreground">Realtor Dashboard</p>
+            </div>
+          </Link>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {navItems.map((item) => (
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-thin">
+          {navItems.map((item, index) => (
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-colors"
+              className="nav-item group"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <item.icon className="w-5 h-5" />
-              {item.label}
+              <item.icon className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+              <span>{item.label}</span>
             </Link>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center gap-3 px-4 py-2">
-            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
-              {profile?.full_name?.[0]?.toUpperCase() || 'R'}
-            </div>
+        <Separator className="mx-4" />
+
+        {/* User Section */}
+        <div className="p-4">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-accent/50">
+            <Avatar className="h-9 w-9">
+              <AvatarFallback className="text-sm">
+                {profile?.full_name?.[0]?.toUpperCase() || 'R'}
+              </AvatarFallback>
+            </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-foreground truncate">
                 {profile?.full_name || 'Realtor'}
               </p>
-              <p className="text-xs text-gray-500 truncate">{session.user.email}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {session.user.email}
+              </p>
             </div>
           </div>
           <form action="/api/auth/signout" method="POST">
             <button
               type="submit"
-              className="w-full mt-2 flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+              className="w-full mt-3 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-destructive rounded-lg hover:bg-destructive/10 transition-all duration-200"
             >
               <LogOutIcon className="w-4 h-4" />
               Sign Out
@@ -98,10 +124,11 @@ export default async function RealtorLayout({
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-8">{children}</div>
+      <main className="flex-1 overflow-y-auto scrollbar-thin">
+        <div className="max-w-7xl mx-auto p-8">
+          {children}
+        </div>
       </main>
     </div>
   );
 }
-

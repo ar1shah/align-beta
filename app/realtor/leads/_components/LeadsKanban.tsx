@@ -22,9 +22,9 @@ interface LeadsKanbanProps {
 
 const stages: { id: LeadStage; label: string; color: string }[] = [
   { id: 'new', label: 'New', color: 'bg-blue-100 text-blue-700' },
-  { id: 'working', label: 'Working', color: 'bg-yellow-100 text-yellow-700' },
+  { id: 'working', label: 'Working', color: 'bg-amber-100 text-amber-700' },
   { id: 'nurture', label: 'Nurture', color: 'bg-purple-100 text-purple-700' },
-  { id: 'lost', label: 'Lost', color: 'bg-gray-100 text-gray-700' },
+  { id: 'lost', label: 'Lost', color: 'bg-slate-100 text-slate-600' },
 ];
 
 export function LeadsKanban({ initialLeads, realtorId }: LeadsKanbanProps) {
@@ -126,12 +126,17 @@ export function LeadsKanban({ initialLeads, realtorId }: LeadsKanbanProps) {
       onDragEnd={handleDragEnd}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stages.map((stage) => (
-          <KanbanColumn
+        {stages.map((stage, index) => (
+          <div
             key={stage.id}
-            stage={stage}
-            leads={leads.filter((l) => l.stage === stage.id)}
-          />
+            className="animate-fade-in-up"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <KanbanColumn
+              stage={stage}
+              leads={leads.filter((l) => l.stage === stage.id)}
+            />
+          </div>
         ))}
       </div>
 
@@ -141,4 +146,3 @@ export function LeadsKanban({ initialLeads, realtorId }: LeadsKanbanProps) {
     </DndContext>
   );
 }
-

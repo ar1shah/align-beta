@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { ArrowLeft, Mail, Phone, Calendar, CheckCircle } from 'lucide-react';
-import { getRealtorWithClients } from '@/lib/db/admin';
+import { notFound } from 'next/navigation';
+import { ArrowLeft, Mail, Phone, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
+import { getRealtorWithClients, Realtor, Assignment, Client } from '@/lib/db/admin';
 import { StatusBadge } from '../../_components/StatusBadge';
 import { RealtorDetailClient } from './_components/RealtorDetailClient';
 
@@ -12,7 +13,51 @@ interface RealtorDetailPageProps {
 
 export default async function RealtorDetailPage({ params }: RealtorDetailPageProps) {
   const { id } = await params;
-  const { realtor, assignments } = await getRealtorWithClients(id);
+  
+  let realtor: Realtor | null = null;
+  let assignments: (Assignment & { client: Client })[] = [];
+  let error: string | null = null;
+
+  try {
+    const result = await getRealtorWithClients(id);
+    realtor = result.realtor;
+    assignments = result.assignments;
+  } catch (err) {
+    console.error('Error loading realtor detail:', err);
+    // Check if it's a "not found" error
+    if (err instanceof Error && err.message.includes('No rows')) {
+      notFound();
+    }
+    error = 'Failed to load realtor data. Please try again.';
+  }
+
+  if (!realtor) {
+    notFound();
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Link href="/admin/realtors" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Realtor Details</h1>
+          </div>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+            <div>
+              <h3 className="font-medium text-red-800">Error Loading Data</h3>
+              <p className="text-sm text-red-600 mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const utilization = realtor.capacity > 0 
     ? Math.round((assignments.length / realtor.capacity) * 100) 

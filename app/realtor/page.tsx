@@ -10,7 +10,9 @@ import {
   BriefcaseIcon,
   DollarSignIcon,
   TrendingUpIcon,
-  AlertCircleIcon,
+  BellIcon,
+  ArrowRightIcon,
+  Clock,
 } from 'lucide-react';
 
 export default async function RealtorDashboard() {
@@ -42,31 +44,31 @@ export default async function RealtorDashboard() {
       value: newLeads,
       icon: ClipboardListIcon,
       color: 'text-blue-600',
-      bg: 'bg-blue-50',
+      bg: 'bg-blue-100',
       href: '/realtor/leads',
     },
     {
       label: 'Working Leads',
       value: workingLeads,
       icon: TrendingUpIcon,
-      color: 'text-green-600',
-      bg: 'bg-green-50',
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-100',
       href: '/realtor/leads',
     },
     {
       label: 'Upcoming Appointments',
       value: upcomingAppointments,
       icon: CalendarIcon,
-      color: 'text-purple-600',
-      bg: 'bg-purple-50',
+      color: 'text-violet-600',
+      bg: 'bg-violet-100',
       href: '/realtor/appointments',
     },
     {
       label: 'Active Deals',
       value: activeDeals,
       icon: BriefcaseIcon,
-      color: 'text-orange-600',
-      bg: 'bg-orange-50',
+      color: 'text-amber-600',
+      bg: 'bg-amber-100',
       href: '/realtor/deals',
     },
     {
@@ -74,7 +76,7 @@ export default async function RealtorDashboard() {
       value: pendingPayouts,
       icon: DollarSignIcon,
       color: 'text-emerald-600',
-      bg: 'bg-emerald-50',
+      bg: 'bg-emerald-100',
       href: '/realtor/payouts',
     },
   ];
@@ -90,27 +92,29 @@ export default async function RealtorDashboard() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
-        <p className="mt-2 text-gray-600">
+      {/* Header */}
+      <div className="animate-fade-in">
+        <h1 className="text-3xl font-bold text-foreground">Dashboard Overview</h1>
+        <p className="mt-2 text-muted-foreground">
           Welcome back! Here&apos;s what&apos;s happening with your business.
         </p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-        {stats.map((stat) => (
+        {stats.map((stat, index) => (
           <Link
             key={stat.label}
             href={stat.href}
-            className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+            className="group bg-card rounded-xl shadow-soft border border-border/50 p-6 hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-300 animate-fade-in-up"
+            style={{ animationDelay: `${index * 100}ms` }}
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                <p className="mt-2 text-3xl font-bold text-gray-900">{stat.value}</p>
+                <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                <p className="mt-2 text-3xl font-bold text-foreground">{stat.value}</p>
               </div>
-              <div className={`${stat.bg} ${stat.color} p-3 rounded-lg`}>
+              <div className={`${stat.bg} ${stat.color} p-3 rounded-xl group-hover:scale-110 transition-transform duration-300`}>
                 <stat.icon className="w-6 h-6" />
               </div>
             </div>
@@ -120,31 +124,52 @@ export default async function RealtorDashboard() {
 
       {/* Today's Appointments */}
       {todayAppointments.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <AlertCircleIcon className="w-5 h-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">
-              Today&apos;s Appointments
-            </h2>
+        <div className="bg-card rounded-xl shadow-soft border border-border/50 overflow-hidden animate-fade-in-up animation-delay-500">
+          <div className="p-6 border-b border-border/50 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-100">
+                <BellIcon className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">
+                  Today&apos;s Appointments
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {todayAppointments.length} scheduled for today
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/realtor/appointments"
+              className="text-sm font-medium text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
+            >
+              View All
+              <ArrowRightIcon className="w-4 h-4" />
+            </Link>
           </div>
-          <div className="space-y-3">
+          <div className="divide-y divide-border/50">
             {todayAppointments.map((apt) => (
               <div
                 key={apt.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                className="flex items-center justify-between p-4 hover:bg-accent/50 transition-colors"
               >
-                <div>
-                  <p className="font-medium text-gray-900">{apt.title}</p>
-                  <p className="text-sm text-gray-600">
-                    {new Date(apt.start_at).toLocaleTimeString('en-US', {
-                      hour: 'numeric',
-                      minute: '2-digit',
-                    })}
-                  </p>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Clock className="w-4 h-4" />
+                    <span className="text-sm font-medium">
+                      {new Date(apt.start_at).toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">{apt.title}</p>
+                  </div>
                 </div>
                 <Link
                   href="/realtor/appointments"
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
                 >
                   View
                 </Link>
@@ -158,31 +183,36 @@ export default async function RealtorDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link
           href="/realtor/leads"
-          className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+          className="group bg-card rounded-xl shadow-soft border border-border/50 p-6 hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-300"
         >
-          <h3 className="font-semibold text-gray-900 mb-2">Manage Leads</h3>
-          <p className="text-sm text-gray-600">
+          <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+            Manage Leads
+          </h3>
+          <p className="text-sm text-muted-foreground">
             View and organize your lead pipeline
           </p>
         </Link>
         <Link
           href="/realtor/appointments"
-          className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+          className="group bg-card rounded-xl shadow-soft border border-border/50 p-6 hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-300"
         >
-          <h3 className="font-semibold text-gray-900 mb-2">Schedule Appointment</h3>
-          <p className="text-sm text-gray-600">
+          <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+            Schedule Appointment
+          </h3>
+          <p className="text-sm text-muted-foreground">
             Add new appointments to your calendar
           </p>
         </Link>
         <Link
           href="/realtor/clients"
-          className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+          className="group bg-card rounded-xl shadow-soft border border-border/50 p-6 hover:shadow-soft-lg hover:-translate-y-0.5 transition-all duration-300"
         >
-          <h3 className="font-semibold text-gray-900 mb-2">Add Client</h3>
-          <p className="text-sm text-gray-600">Create a new client record</p>
+          <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+            Add Client
+          </h3>
+          <p className="text-sm text-muted-foreground">Create a new client record</p>
         </Link>
       </div>
     </div>
   );
 }
-

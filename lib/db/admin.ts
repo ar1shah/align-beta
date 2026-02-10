@@ -82,149 +82,247 @@ export interface QuizResponse {
 }
 
 // ==========================================
+// ERROR HANDLING HELPER
+// ==========================================
+
+class DatabaseError extends Error {
+  constructor(message: string, public originalError?: unknown) {
+    super(message);
+    this.name = 'DatabaseError';
+  }
+}
+
+// ==========================================
 // CLIENTS
 // ==========================================
 
-export async function getAllClients() {
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from('clients')
-    .select('*')
-    .order('created_at', { ascending: false });
+export async function getAllClients(): Promise<Client[]> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase
+      .from('clients')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-  if (error) throw error;
-  return data as Client[];
+    if (error) {
+      console.error('Error fetching all clients:', error);
+      throw new DatabaseError('Failed to fetch clients', error);
+    }
+    return (data || []) as Client[];
+  } catch (err) {
+    console.error('getAllClients error:', err);
+    throw err;
+  }
 }
 
-export async function getClient(id: string) {
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from('clients')
-    .select('*')
-    .eq('id', id)
-    .single();
+export async function getClient(id: string): Promise<Client | null> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-  if (error) throw error;
-  return data as Client;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // Not found
+      }
+      console.error('Error fetching client:', error);
+      throw new DatabaseError('Failed to fetch client', error);
+    }
+    return data as Client;
+  } catch (err) {
+    console.error('getClient error:', err);
+    throw err;
+  }
 }
 
 export async function getClientWithAssignment(id: string) {
-  const supabase = await createServerSupabaseClient();
-  
-  // Get client
-  const { data: client, error: clientError } = await supabase
-    .from('clients')
-    .select('*')
-    .eq('id', id)
-    .single();
+  try {
+    const supabase = await createServerSupabaseClient();
+    
+    // Get client
+    const { data: client, error: clientError } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-  if (clientError) throw clientError;
+    if (clientError) {
+      if (clientError.code === 'PGRST116') {
+        throw new Error('No rows returned');
+      }
+      console.error('Error fetching client with assignment:', clientError);
+      throw new DatabaseError('Failed to fetch client', clientError);
+    }
 
-  // Get current assignment
-  const { data: assignment } = await supabase
-    .from('client_realtor_assignments')
-    .select(`
-      *,
-      realtor:realtors(*)
-    `)
-    .eq('client_id', id)
-    .is('unassigned_at', null)
-    .single();
+    // Get current assignment (may not exist)
+    const { data: assignment, error: assignmentError } = await supabase
+      .from('client_realtor_assignments')
+      .select(`
+        *,
+        realtor:realtors(*)
+      `)
+      .eq('client_id', id)
+      .is('unassigned_at', null)
+      .single();
 
-  return { client: client as Client, assignment };
+    // Ignore "no rows" error for assignment - it just means client is unassigned
+    if (assignmentError && assignmentError.code !== 'PGRST116') {
+      console.error('Error fetching assignment:', assignmentError);
+    }
+
+    return { client: client as Client, assignment: assignment || null };
+  } catch (err) {
+    console.error('getClientWithAssignment error:', err);
+    throw err;
+  }
 }
 
-export async function getUnassignedClients() {
-  const supabase = await createServerSupabaseClient();
-  
-  // Get all clients
-  const { data: allClients, error: clientsError } = await supabase
-    .from('clients')
-    .select('*')
-    .order('created_at', { ascending: false });
+export async function getUnassignedClients(): Promise<Client[]> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    
+    // Get all clients
+    const { data: allClients, error: clientsError } = await supabase
+      .from('clients')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-  if (clientsError) throw clientsError;
+    if (clientsError) {
+      console.error('Error fetching clients:', clientsError);
+      throw new DatabaseError('Failed to fetch clients', clientsError);
+    }
 
-  // Get all active assignments
-  const { data: assignments, error: assignmentsError } = await supabase
-    .from('client_realtor_assignments')
-    .select('client_id')
-    .is('unassigned_at', null);
+    // Get all active assignments
+    const { data: assignments, error: assignmentsError } = await supabase
+      .from('client_realtor_assignments')
+      .select('client_id')
+      .is('unassigned_at', null);
 
-  if (assignmentsError) throw assignmentsError;
+    if (assignmentsError) {
+      console.error('Error fetching assignments:', assignmentsError);
+      throw new DatabaseError('Failed to fetch assignments', assignmentsError);
+    }
 
-  const assignedClientIds = new Set(assignments.map((a) => a.client_id));
-  
-  return allClients.filter((c) => !assignedClientIds.has(c.id)) as Client[];
+    const assignedClientIds = new Set((assignments || []).map((a) => a.client_id));
+    
+    return (allClients || []).filter((c) => !assignedClientIds.has(c.id)) as Client[];
+  } catch (err) {
+    console.error('getUnassignedClients error:', err);
+    throw err;
+  }
 }
 
 // ==========================================
 // REALTORS
 // ==========================================
 
-export async function getAllRealtors() {
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from('realtors')
-    .select('*')
-    .order('full_name', { ascending: true });
+export async function getAllRealtors(): Promise<Realtor[]> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase
+      .from('realtors')
+      .select('*')
+      .order('full_name', { ascending: true });
 
-  if (error) throw error;
-  return data as Realtor[];
+    if (error) {
+      console.error('Error fetching all realtors:', error);
+      throw new DatabaseError('Failed to fetch realtors', error);
+    }
+    return (data || []) as Realtor[];
+  } catch (err) {
+    console.error('getAllRealtors error:', err);
+    throw err;
+  }
 }
 
-export async function getRealtor(id: string) {
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from('realtors')
-    .select('*')
-    .eq('id', id)
-    .single();
+export async function getRealtor(id: string): Promise<Realtor | null> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase
+      .from('realtors')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-  if (error) throw error;
-  return data as Realtor;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // Not found
+      }
+      console.error('Error fetching realtor:', error);
+      throw new DatabaseError('Failed to fetch realtor', error);
+    }
+    return data as Realtor;
+  } catch (err) {
+    console.error('getRealtor error:', err);
+    throw err;
+  }
 }
 
 export async function getRealtorWithClients(id: string) {
-  const supabase = await createServerSupabaseClient();
-  
-  // Get realtor
-  const { data: realtor, error: realtorError } = await supabase
-    .from('realtors')
-    .select('*')
-    .eq('id', id)
-    .single();
+  try {
+    const supabase = await createServerSupabaseClient();
+    
+    // Get realtor
+    const { data: realtor, error: realtorError } = await supabase
+      .from('realtors')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-  if (realtorError) throw realtorError;
+    if (realtorError) {
+      if (realtorError.code === 'PGRST116') {
+        throw new Error('No rows returned');
+      }
+      console.error('Error fetching realtor:', realtorError);
+      throw new DatabaseError('Failed to fetch realtor', realtorError);
+    }
 
-  // Get assigned clients
-  const { data: assignments, error: assignmentsError } = await supabase
-    .from('client_realtor_assignments')
-    .select(`
-      *,
-      client:clients(*)
-    `)
-    .eq('realtor_id', id)
-    .is('unassigned_at', null);
+    // Get assigned clients
+    const { data: assignments, error: assignmentsError } = await supabase
+      .from('client_realtor_assignments')
+      .select(`
+        *,
+        client:clients(*)
+      `)
+      .eq('realtor_id', id)
+      .is('unassigned_at', null);
 
-  if (assignmentsError) throw assignmentsError;
+    if (assignmentsError) {
+      console.error('Error fetching assignments:', assignmentsError);
+      throw new DatabaseError('Failed to fetch assignments', assignmentsError);
+    }
 
-  return { 
-    realtor: realtor as Realtor, 
-    assignments: assignments as (Assignment & { client: Client })[]
-  };
+    return { 
+      realtor: realtor as Realtor, 
+      assignments: (assignments || []) as (Assignment & { client: Client })[]
+    };
+  } catch (err) {
+    console.error('getRealtorWithClients error:', err);
+    throw err;
+  }
 }
 
-export async function getActiveRealtors() {
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from('realtors')
-    .select('*')
-    .eq('active', true)
-    .order('full_name', { ascending: true });
+export async function getActiveRealtors(): Promise<Realtor[]> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase
+      .from('realtors')
+      .select('*')
+      .eq('active', true)
+      .order('full_name', { ascending: true });
 
-  if (error) throw error;
-  return data as Realtor[];
+    if (error) {
+      console.error('Error fetching active realtors:', error);
+      throw new DatabaseError('Failed to fetch active realtors', error);
+    }
+    return (data || []) as Realtor[];
+  } catch (err) {
+    console.error('getActiveRealtors error:', err);
+    throw err;
+  }
 }
 
 // ==========================================
@@ -232,174 +330,263 @@ export async function getActiveRealtors() {
 // ==========================================
 
 export async function getAllAssignments() {
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from('client_realtor_assignments')
-    .select(`
-      *,
-      client:clients(*),
-      realtor:realtors(*),
-      assigner:assigned_by(*)
-    `)
-    .is('unassigned_at', null)
-    .order('assigned_at', { ascending: false });
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase
+      .from('client_realtor_assignments')
+      .select(`
+        *,
+        client:clients(*),
+        realtor:realtors(*)
+      `)
+      .is('unassigned_at', null)
+      .order('assigned_at', { ascending: false });
 
-  if (error) throw error;
-  return data;
+    if (error) {
+      console.error('Error fetching all assignments:', error);
+      throw new DatabaseError('Failed to fetch assignments', error);
+    }
+    return data || [];
+  } catch (err) {
+    console.error('getAllAssignments error:', err);
+    throw err;
+  }
 }
 
 export async function getAssignmentHistory(clientId: string) {
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from('client_realtor_assignments')
-    .select(`
-      *,
-      realtor:realtors(full_name, email)
-    `)
-    .eq('client_id', clientId)
-    .order('assigned_at', { ascending: false });
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase
+      .from('client_realtor_assignments')
+      .select(`
+        *,
+        realtor:realtors(full_name, email)
+      `)
+      .eq('client_id', clientId)
+      .order('assigned_at', { ascending: false });
 
-  if (error) throw error;
-  return data;
+    if (error) {
+      console.error('Error fetching assignment history:', error);
+      throw new DatabaseError('Failed to fetch assignment history', error);
+    }
+    return data || [];
+  } catch (err) {
+    console.error('getAssignmentHistory error:', err);
+    throw err;
+  }
 }
 
 // ==========================================
 // QUIZ SUBMISSIONS
 // ==========================================
 
-export async function getClientQuizSessions(clientId: string) {
-  const supabase = await createServerSupabaseClient();
-  
-  // First get the user_id for this client
-  const { data: client } = await supabase
-    .from('clients')
-    .select('user_id')
-    .eq('id', clientId)
-    .single();
+export async function getClientQuizSessions(clientId: string): Promise<QuizSubmission[]> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    
+    // First get the user_id for this client
+    const { data: client, error: clientError } = await supabase
+      .from('clients')
+      .select('user_id')
+      .eq('id', clientId)
+      .single();
 
-  if (!client?.user_id) return [];
+    if (clientError && clientError.code !== 'PGRST116') {
+      console.error('Error fetching client for quiz sessions:', clientError);
+    }
 
-  const { data, error } = await supabase
-    .from('quiz_sessions')
-    .select('*')
-    .eq('user_id', client.user_id)
-    .order('started_at', { ascending: false });
+    if (!client?.user_id) return [];
 
-  if (error) throw error;
-  return data as QuizSubmission[];
+    const { data, error } = await supabase
+      .from('quiz_sessions')
+      .select('*')
+      .eq('user_id', client.user_id)
+      .order('started_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching quiz sessions:', error);
+      throw new DatabaseError('Failed to fetch quiz sessions', error);
+    }
+    return (data || []) as QuizSubmission[];
+  } catch (err) {
+    console.error('getClientQuizSessions error:', err);
+    throw err;
+  }
 }
 
 export async function getQuizSessionWithResponses(sessionId: string) {
-  const supabase = await createServerSupabaseClient();
-  
-  const { data: session, error: sessionError } = await supabase
-    .from('quiz_sessions')
-    .select('*')
-    .eq('id', sessionId)
-    .single();
+  try {
+    const supabase = await createServerSupabaseClient();
+    
+    const { data: session, error: sessionError } = await supabase
+      .from('quiz_sessions')
+      .select('*')
+      .eq('id', sessionId)
+      .single();
 
-  if (sessionError) throw sessionError;
+    if (sessionError) {
+      if (sessionError.code === 'PGRST116') {
+        throw new Error('No rows returned');
+      }
+      console.error('Error fetching quiz session:', sessionError);
+      throw new DatabaseError('Failed to fetch quiz session', sessionError);
+    }
 
-  const { data: responses, error: responsesError } = await supabase
-    .from('quiz_responses')
-    .select(`
-      *,
-      question:quiz_questions(*)
-    `)
-    .eq('session_id', sessionId)
-    .order('created_at', { ascending: true });
+    const { data: responses, error: responsesError } = await supabase
+      .from('quiz_responses')
+      .select(`
+        *,
+        question:quiz_questions(*)
+      `)
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: true });
 
-  if (responsesError) throw responsesError;
+    if (responsesError) {
+      console.error('Error fetching quiz responses:', responsesError);
+      throw new DatabaseError('Failed to fetch quiz responses', responsesError);
+    }
 
-  return { session: session as QuizSubmission, responses };
+    return { session: session as QuizSubmission, responses: responses || [] };
+  } catch (err) {
+    console.error('getQuizSessionWithResponses error:', err);
+    throw err;
+  }
 }
 
-export async function getAllQuizSessions() {
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from('quiz_sessions')
-    .select('*')
-    .order('started_at', { ascending: false });
+export async function getAllQuizSessions(): Promise<QuizSubmission[]> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase
+      .from('quiz_sessions')
+      .select('*')
+      .order('started_at', { ascending: false });
 
-  if (error) throw error;
-  return data as QuizSubmission[];
+    if (error) {
+      console.error('Error fetching all quiz sessions:', error);
+      throw new DatabaseError('Failed to fetch quiz sessions', error);
+    }
+    return (data || []) as QuizSubmission[];
+  } catch (err) {
+    console.error('getAllQuizSessions error:', err);
+    throw err;
+  }
 }
 
-export async function getRecentQuizSessions(limit: number = 10) {
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from('quiz_sessions')
-    .select('*')
-    .order('started_at', { ascending: false })
-    .limit(limit);
+export async function getRecentQuizSessions(limit: number = 10): Promise<QuizSubmission[]> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase
+      .from('quiz_sessions')
+      .select('*')
+      .order('started_at', { ascending: false })
+      .limit(limit);
 
-  if (error) throw error;
-  return data as QuizSubmission[];
+    if (error) {
+      console.error('Error fetching recent quiz sessions:', error);
+      throw new DatabaseError('Failed to fetch recent quiz sessions', error);
+    }
+    return (data || []) as QuizSubmission[];
+  } catch (err) {
+    console.error('getRecentQuizSessions error:', err);
+    throw err;
+  }
 }
 
 // ==========================================
 // AUDIT LOGS
 // ==========================================
 
-export async function getAuditLogs(limit: number = 100) {
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from('audit_logs')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(limit);
+export async function getAuditLogs(limit: number = 100): Promise<AuditLog[]> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase
+      .from('audit_logs')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(limit);
 
-  if (error) throw error;
-  return data as AuditLog[];
+    if (error) {
+      console.error('Error fetching audit logs:', error);
+      throw new DatabaseError('Failed to fetch audit logs', error);
+    }
+    return (data || []) as AuditLog[];
+  } catch (err) {
+    console.error('getAuditLogs error:', err);
+    throw err;
+  }
 }
 
-export async function getAuditLogsByEntity(entityType: string, entityId: string) {
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from('audit_logs')
-    .select('*')
-    .eq('entity', entityType)
-    .eq('entity_id', entityId)
-    .order('created_at', { ascending: false });
+export async function getAuditLogsByEntity(entityType: string, entityId: string): Promise<AuditLog[]> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase
+      .from('audit_logs')
+      .select('*')
+      .eq('entity', entityType)
+      .eq('entity_id', entityId)
+      .order('created_at', { ascending: false });
 
-  if (error) throw error;
-  return data as AuditLog[];
+    if (error) {
+      console.error('Error fetching audit logs by entity:', error);
+      throw new DatabaseError('Failed to fetch audit logs', error);
+    }
+    return (data || []) as AuditLog[];
+  } catch (err) {
+    console.error('getAuditLogsByEntity error:', err);
+    throw err;
+  }
 }
 
 // ==========================================
 // CLIENT NOTES
 // ==========================================
 
-export async function getClientNotes(clientId: string) {
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from('client_notes')
-    .select('*')
-    .eq('client_id', clientId)
-    .order('created_at', { ascending: false });
+export async function getClientNotes(clientId: string): Promise<ClientNote[]> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase
+      .from('client_notes')
+      .select('*')
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: false });
 
-  if (error) throw error;
-  return data as ClientNote[];
+    if (error) {
+      console.error('Error fetching client notes:', error);
+      throw new DatabaseError('Failed to fetch client notes', error);
+    }
+    return (data || []) as ClientNote[];
+  } catch (err) {
+    console.error('getClientNotes error:', err);
+    throw err;
+  }
 }
 
-export async function createClientNote(clientId: string, content: string) {
-  const supabase = await createServerSupabaseClient();
-  
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error('Not authenticated');
+export async function createClientNote(clientId: string, content: string): Promise<ClientNote> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Not authenticated');
 
-  const { data, error } = await supabase
-    .from('client_notes')
-    .insert({
-      client_id: clientId,
-      author_id: session.user.id,
-      content,
-    })
-    .select()
-    .single();
+    const { data, error } = await supabase
+      .from('client_notes')
+      .insert({
+        client_id: clientId,
+        author_id: session.user.id,
+        content,
+      })
+      .select()
+      .single();
 
-  if (error) throw error;
-  return data as ClientNote;
+    if (error) {
+      console.error('Error creating client note:', error);
+      throw new DatabaseError('Failed to create client note', error);
+    }
+    return data as ClientNote;
+  } catch (err) {
+    console.error('createClientNote error:', err);
+    throw err;
+  }
 }
 
 // ==========================================
@@ -407,63 +594,274 @@ export async function createClientNote(clientId: string, content: string) {
 // ==========================================
 
 export async function getDashboardStats() {
-  const supabase = await createServerSupabaseClient();
+  try {
+    const supabase = await createServerSupabaseClient();
 
-  // Total clients
-  const { count: totalClients } = await supabase
-    .from('clients')
-    .select('*', { count: 'exact', head: true });
+    // Total clients
+    const { count: totalClients, error: clientsError } = await supabase
+      .from('clients')
+      .select('*', { count: 'exact', head: true });
 
-  // Unassigned clients
-  const unassignedClients = await getUnassignedClients();
+    if (clientsError) {
+      console.error('Error counting clients:', clientsError);
+    }
 
-  // Active realtors
-  const { count: activeRealtors } = await supabase
-    .from('realtors')
-    .select('*', { count: 'exact', head: true })
-    .eq('active', true);
+    // Unassigned clients
+    let unassignedClientsCount = 0;
+    try {
+      const unassignedClients = await getUnassignedClients();
+      unassignedClientsCount = unassignedClients.length;
+    } catch (err) {
+      console.error('Error getting unassigned clients:', err);
+    }
 
-  // New submissions in last 7 days
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-  
-  const { count: newSubmissions } = await supabase
-    .from('quiz_sessions')
-    .select('*', { count: 'exact', head: true })
-    .gte('started_at', sevenDaysAgo.toISOString());
+    // Active realtors
+    const { count: activeRealtors, error: realtorsError } = await supabase
+      .from('realtors')
+      .select('*', { count: 'exact', head: true })
+      .eq('active', true);
 
-  // Calculate capacity utilization
-  const realtors = await getAllRealtors();
-  const activeRealtorsList = realtors.filter(r => r.active);
-  
-  const { data: activeAssignments } = await supabase
-    .from('client_realtor_assignments')
-    .select('realtor_id')
-    .is('unassigned_at', null);
+    if (realtorsError) {
+      console.error('Error counting active realtors:', realtorsError);
+    }
 
-  const assignmentCounts = new Map<string, number>();
-  activeAssignments?.forEach((a) => {
-    const count = assignmentCounts.get(a.realtor_id) || 0;
-    assignmentCounts.set(a.realtor_id, count + 1);
-  });
+    // New submissions in last 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    const { count: newSubmissions, error: submissionsError } = await supabase
+      .from('quiz_sessions')
+      .select('*', { count: 'exact', head: true })
+      .gte('started_at', sevenDaysAgo.toISOString());
 
-  let totalCapacity = 0;
-  let totalAssigned = 0;
-  activeRealtorsList.forEach((r) => {
-    totalCapacity += r.capacity;
-    totalAssigned += assignmentCounts.get(r.id) || 0;
-  });
+    if (submissionsError) {
+      console.error('Error counting new submissions:', submissionsError);
+    }
 
-  const capacityUtilization = totalCapacity > 0 
-    ? Math.round((totalAssigned / totalCapacity) * 100) 
-    : 0;
+    // Calculate capacity utilization
+    let capacityUtilization = 0;
+    try {
+      const realtors = await getAllRealtors();
+      const activeRealtorsList = realtors.filter(r => r.active);
+      
+      const { data: activeAssignments, error: assignmentsError } = await supabase
+        .from('client_realtor_assignments')
+        .select('realtor_id')
+        .is('unassigned_at', null);
 
-  return {
-    totalClients: totalClients || 0,
-    unassignedClients: unassignedClients.length,
-    activeRealtors: activeRealtors || 0,
-    newSubmissions: newSubmissions || 0,
-    capacityUtilization,
-  };
+      if (assignmentsError) {
+        console.error('Error fetching active assignments:', assignmentsError);
+      }
+
+      const assignmentCounts = new Map<string, number>();
+      activeAssignments?.forEach((a) => {
+        if (a.realtor_id) {
+          const count = assignmentCounts.get(a.realtor_id) || 0;
+          assignmentCounts.set(a.realtor_id, count + 1);
+        }
+      });
+
+      let totalCapacity = 0;
+      let totalAssigned = 0;
+      activeRealtorsList.forEach((r) => {
+        totalCapacity += r.capacity;
+        totalAssigned += assignmentCounts.get(r.id) || 0;
+      });
+
+      capacityUtilization = totalCapacity > 0 
+        ? Math.round((totalAssigned / totalCapacity) * 100) 
+        : 0;
+    } catch (err) {
+      console.error('Error calculating capacity utilization:', err);
+    }
+
+    return {
+      totalClients: totalClients || 0,
+      unassignedClients: unassignedClientsCount,
+      activeRealtors: activeRealtors || 0,
+      newSubmissions: newSubmissions || 0,
+      capacityUtilization,
+    };
+  } catch (err) {
+    console.error('getDashboardStats error:', err);
+    // Return default values instead of throwing
+    return {
+      totalClients: 0,
+      unassignedClients: 0,
+      activeRealtors: 0,
+      newSubmissions: 0,
+      capacityUtilization: 0,
+    };
+  }
+}
+
+// ==========================================
+// CLIENT ASSIGNMENT BY USER ID
+// ==========================================
+
+export interface ClientAssignment {
+  client: Client;
+  realtor: Realtor;
+  assigned_at: string;
+}
+
+export async function getClientAssignmentByUserId(userId: string): Promise<ClientAssignment | null> {
+  try {
+    const supabase = await createServerSupabaseClient();
+
+    // Use the SECURITY DEFINER function to bypass RLS and avoid recursion
+    const { data, error } = await supabase
+      .rpc('get_client_assignment_for_user', { p_user_id: userId });
+
+    if (error) {
+      console.error('Error fetching client assignment:', error);
+      return null;
+    }
+
+    // The function returns an array, get the first result
+    if (!data || data.length === 0) {
+      return null;
+    }
+
+    const row = data[0];
+
+    // Build the Client and Realtor objects from the flat result
+    const client: Client = {
+      id: row.client_id,
+      user_id: userId,
+      full_name: row.client_full_name,
+      email: row.client_email,
+      phone: row.client_phone,
+      status: 'assigned',
+      source: 'quiz',
+      tags: null,
+      notes: null,
+      created_at: '',
+      updated_at: '',
+    };
+
+    const realtor: Realtor = {
+      id: row.realtor_id,
+      user_id: null,
+      full_name: row.realtor_full_name,
+      email: row.realtor_email,
+      phone: row.realtor_phone,
+      msa_signed_at: null,
+      capacity: 0,
+      active: true,
+      notes: null,
+      created_at: '',
+      updated_at: '',
+    };
+
+    return {
+      client,
+      realtor,
+      assigned_at: row.assigned_at,
+    };
+  } catch (err) {
+    console.error('getClientAssignmentByUserId error:', err);
+    // Return null instead of throwing to allow graceful degradation
+    return null;
+  }
+}
+
+// ==========================================
+// REALTOR WITH NOTIFICATION SETTINGS
+// ==========================================
+
+export interface RealtorWithSettings extends Realtor {
+  new_lead_alerts: boolean;
+}
+
+export async function getRealtorWithNotificationSettings(realtorId: string): Promise<RealtorWithSettings | null> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    
+    // Get realtor info
+    const { data: realtor, error: realtorError } = await supabase
+      .from('realtors')
+      .select('*')
+      .eq('id', realtorId)
+      .single();
+
+    if (realtorError) {
+      if (realtorError.code === 'PGRST116') {
+        return null; // Not found
+      }
+      console.error('Error fetching realtor:', realtorError);
+      return null;
+    }
+
+    // Get notification settings from realtor_profile
+    // Note: realtor_profile uses user_id as the key (realtor_id column)
+    let newLeadAlerts = true; // Default to true if no settings exist
+    
+    if (realtor.user_id) {
+      const { data: profile, error: profileError } = await supabase
+        .from('realtor_profile')
+        .select('new_lead_alerts')
+        .eq('realtor_id', realtor.user_id)
+        .single();
+
+      if (!profileError && profile) {
+        newLeadAlerts = profile.new_lead_alerts ?? true;
+      }
+    }
+
+    return {
+      ...(realtor as Realtor),
+      new_lead_alerts: newLeadAlerts,
+    };
+  } catch (err) {
+    console.error('getRealtorWithNotificationSettings error:', err);
+    return null;
+  }
+}
+
+// ==========================================
+// GET CURRENT ASSIGNMENT FOR CLIENT
+// ==========================================
+
+export async function getCurrentAssignmentForClient(clientId: string): Promise<{
+  realtor: Realtor;
+  assigned_at: string;
+} | null> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    
+    const { data, error } = await supabase
+      .from('client_realtor_assignments')
+      .select(`
+        assigned_at,
+        realtor:realtors(*)
+      `)
+      .eq('client_id', clientId)
+      .is('unassigned_at', null)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // No active assignment
+      }
+      console.error('Error fetching current assignment:', error);
+      return null;
+    }
+
+    // Supabase returns joined relations as arrays
+    const realtorData = Array.isArray(data.realtor) ? data.realtor[0] : data.realtor;
+    
+    if (!data || !realtorData) {
+      return null;
+    }
+
+    return {
+      realtor: realtorData as Realtor,
+      assigned_at: data.assigned_at,
+    };
+  } catch (err) {
+    console.error('getCurrentAssignmentForClient error:', err);
+    return null;
+  }
 }
 

@@ -2,10 +2,12 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, UserPlus, ExternalLink } from 'lucide-react';
+import { Search, UserPlus, ExternalLink, Users } from 'lucide-react';
 import { Client, Realtor } from '@/lib/db/admin';
 import { StatusBadge } from '../../_components/StatusBadge';
 import { AssignClientDialog } from '../../_components/AssignClientDialog';
+import { EmptyState } from '../../_components/EmptyState';
+import { cn } from '@/lib/utils';
 
 interface ClientsTableClientProps {
   clients: Client[];
@@ -34,19 +36,23 @@ export function ClientsTableClient({ clients: initialClients, realtors }: Client
   const statuses = ['all', ...new Set(initialClients.map((c) => c.status))];
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+    <div className="bg-card rounded-xl shadow-soft border border-border/50">
       {/* Filters */}
-      <div className="p-4 border-b border-gray-100 space-y-4">
+      <div className="p-4 border-b border-border/50 space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search by name, email, or phone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              className={cn(
+                'w-full pl-10 pr-4 py-2.5 rounded-lg border border-input bg-background text-sm',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                'placeholder:text-muted-foreground transition-all duration-200'
+              )}
             />
           </div>
 
@@ -54,7 +60,11 @@ export function ClientsTableClient({ clients: initialClients, realtors }: Client
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+            className={cn(
+              'px-4 py-2.5 rounded-lg border border-input bg-background text-sm',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+              'transition-all duration-200'
+            )}
           >
             {statuses.map((status) => (
               <option key={status} value={status}>
@@ -64,79 +74,90 @@ export function ClientsTableClient({ clients: initialClients, realtors }: Client
           </select>
         </div>
 
-        <div className="text-sm text-gray-500">
-          Showing {filteredClients.length} of {initialClients.length} clients
+        <div className="text-sm text-muted-foreground">
+          Showing <span className="font-medium text-foreground">{filteredClients.length}</span> of{' '}
+          <span className="font-medium text-foreground">{initialClients.length}</span> clients
         </div>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <thead>
+            <tr className="border-b border-border/50">
+              <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/30 first:rounded-tl-lg">
                 Client
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/30">
                 Contact
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/30">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/30">
                 Source
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/30">
                 Created
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/30 last:rounded-tr-lg">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-border/50">
             {filteredClients.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-sm text-gray-500">
-                  No clients found
+                <td colSpan={6}>
+                  <EmptyState
+                    icon={Users}
+                    title="No clients found"
+                    description={searchTerm || statusFilter !== 'all' 
+                      ? "Try adjusting your search or filter criteria" 
+                      : "Clients will appear here once they complete the quiz"}
+                  />
                 </td>
               </tr>
             ) : (
-              filteredClients.map((client) => (
-                <tr key={client.id} className="hover:bg-gray-50 transition-colors">
+              filteredClients.map((client, index) => (
+                <tr 
+                  key={client.id} 
+                  className="hover:bg-accent/50 transition-colors animate-fade-in"
+                  style={{ animationDelay: `${index * 30}ms` }}
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Link
                       href={`/admin/clients/${client.id}`}
-                      className="font-medium text-blue-600 hover:text-blue-800"
+                      className="font-medium text-primary hover:text-primary/80 transition-colors"
                     >
                       {client.full_name}
                     </Link>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">{client.email}</div>
-                    <div className="text-sm text-gray-500">{client.phone}</div>
+                    <div className="text-sm text-foreground">{client.email}</div>
+                    <div className="text-sm text-muted-foreground">{client.phone}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <StatusBadge status={client.status} />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground capitalize">
                     {client.source}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                     {new Date(client.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => setAssignDialogClient(client)}
-                        className="text-blue-600 hover:text-blue-900 p-1"
+                        className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                         title="Assign to realtor"
                       >
                         <UserPlus className="w-4 h-4" />
                       </button>
                       <Link
                         href={`/admin/clients/${client.id}`}
-                        className="text-gray-600 hover:text-gray-900 p-1"
+                        className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                         title="View details"
                       >
                         <ExternalLink className="w-4 h-4" />
@@ -165,4 +186,3 @@ export function ClientsTableClient({ clients: initialClients, realtors }: Client
     </div>
   );
 }
-

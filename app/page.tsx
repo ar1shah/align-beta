@@ -1,81 +1,115 @@
+'use client';
+
 import Link from 'next/link';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { Button } from './_components/Button';
 
 export default function Home() {
   // Check if env vars are missing
-  const envMissing =
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const envMissing = !process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   if (envMissing) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="max-w-2xl w-full bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            ⚙️ Setup Required
-          </h1>
-          <p className="text-gray-600 mb-6">
-            Welcome to Align! Before you can start using the app, you need to
-            configure your Supabase credentials.
+      <div className="min-h-screen flex items-center justify-center animated-gradient px-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-md w-full bg-white rounded-2xl shadow-soft-lg p-8 text-center border border-border/50"
+        >
+          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-amber-100 flex items-center justify-center">
+            <svg
+              className="w-8 h-8 text-amber-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-foreground mb-2">Setup Required</h2>
+          <p className="text-muted-foreground text-sm">
+            Please configure your environment variables to get started.
           </p>
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-            <h2 className="font-semibold text-amber-900 mb-2">
-              Missing Environment Variables
-            </h2>
-            <p className="text-sm text-amber-800">
-              Please create a <code className="bg-amber-100 px-2 py-1 rounded">.env.local</code> file
-              in the project root with the following variables:
-            </p>
-          </div>
-          <div className="bg-gray-900 text-gray-100 rounded-xl p-4 font-mono text-sm mb-6">
-            <pre>
-              NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co{'\n'}
-              NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
-            </pre>
-          </div>
-          <div className="space-y-3 text-sm text-gray-600">
-            <p><strong className="text-gray-900">Step 1:</strong> Create a Supabase project at <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">supabase.com</a></p>
-            <p><strong className="text-gray-900">Step 2:</strong> Copy your Project URL and anon public key from Project Settings → API</p>
-            <p><strong className="text-gray-900">Step 3:</strong> Create <code className="bg-gray-100 px-2 py-1 rounded">.env.local</code> in the project root and paste the values</p>
-            <p><strong className="text-gray-900">Step 4:</strong> Run the SQL schema from <code className="bg-gray-100 px-2 py-1 rounded">SETUP.md</code> in your Supabase SQL Editor</p>
-            <p><strong className="text-gray-900">Step 5:</strong> Restart the development server</p>
-          </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="max-w-4xl w-full text-center space-y-8">
-        <div className="space-y-4">
-          <h1 className="text-6xl font-bold text-gray-900 tracking-tight">
-            Align
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Find your perfect realtor match. Connect with experienced agents
-            who understand your unique needs.
-          </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
-          <Link href="/login" className="w-full sm:w-auto">
-            <Button variant="primary" fullWidth>
-              Log In
-            </Button>
-          </Link>
-          <Link href="/signup" className="w-full sm:w-auto">
-            <Button variant="outline" fullWidth>
-              Sign Up
-            </Button>
-          </Link>
-        </div>
-
-        <div className="pt-12 text-sm text-gray-500">
-          <p>Modern real estate connections, simplified.</p>
-        </div>
+    <div className="min-h-screen animated-gradient overflow-hidden relative">
+      {/* Animated floating orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-200/40 rounded-full blur-3xl animate-float-slow" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-200/30 rounded-full blur-3xl animate-float-medium" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-slate-200/20 rounded-full blur-3xl animate-float-slow animation-delay-500" />
       </div>
+
+      {/* Main content - centered */}
+      <main className="relative z-10 min-h-screen flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center"
+        >
+          {/* Blue Logo + Align text side by side */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="flex items-center justify-center gap-4 mb-8"
+          >
+            <Image 
+              src="/bluelogo.svg" 
+              alt="Align" 
+              width={100} 
+              height={51}
+              priority
+            />
+            <h1 
+              className="text-5xl sm:text-6xl font-bold"
+              style={{ color: '#58748F' }}
+            >
+              Align
+            </h1>
+          </motion.div>
+
+          {/* Tagline */}
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="text-lg text-muted-foreground mb-10 max-w-md mx-auto"
+          >
+            Welcome to your real estate dashboard
+          </motion.p>
+
+          {/* Action buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          >
+            <Link href="/login">
+              <Button variant="outline" size="xl" className="min-w-[160px]">
+                Log In
+              </Button>
+            </Link>
+            <Link href="/signup">
+              <Button variant="brand" size="xl" className="min-w-[160px]">
+                Sign Up
+              </Button>
+            </Link>
+          </motion.div>
+        </motion.div>
+      </main>
     </div>
   );
 }
-

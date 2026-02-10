@@ -1,21 +1,54 @@
-import { getAuditLogs } from '@/lib/db/admin';
+import { AlertCircle } from 'lucide-react';
+import { getAuditLogs, AuditLog } from '@/lib/db/admin';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { AuditLogClient } from './_components/AuditLogClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AuditPage() {
-  const logs = await getAuditLogs(200); // Get last 200 logs
-  const supabase = await createServerSupabaseClient();
+  let logs: AuditLog[] = [];
+  let error: string | null = null;
+  let actorMap = new Map<string, string | null>();
 
-  // Get actor names
-  const actorIds = [...new Set(logs.map((l) => l.actor_user_id).filter(Boolean))];
-  const { data: profiles } = await supabase
-    .from('profiles')
-    .select('id, full_name')
-    .in('id', actorIds as string[]);
+  try {
+    logs = await getAuditLogs(200); // Get last 200 logs
+    const supabase = await createServerSupabaseClient();
 
-  const actorMap = new Map(profiles?.map((p) => [p.id, p.full_name]) || []);
+    // Get actor names
+    const actorIds = [...new Set(logs.map((l) => l.actor_user_id).filter(Boolean))];
+    
+    if (actorIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', actorIds as string[]);
+
+      actorMap = new Map(profiles?.map((p) => [p.id, p.full_name]) || []);
+    }
+  } catch (err) {
+    console.error('Error loading audit page:', err);
+    error = 'Failed to load audit logs. Please try refreshing the page.';
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Audit Log</h1>
+          <p className="text-gray-500 mt-1">Track all administrative actions and changes</p>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+            <div>
+              <h3 className="font-medium text-red-800">Error Loading Data</h3>
+              <p className="text-sm text-red-600 mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const logsWithActors = logs.map((log) => ({
     ...log,
