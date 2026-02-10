@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, UserPlus, ExternalLink, Users } from 'lucide-react';
+import { Search, UserPlus, ExternalLink } from 'lucide-react';
 import { Client, Realtor } from '@/lib/db/admin';
 import { StatusBadge } from '../../_components/StatusBadge';
 import { AssignClientDialog } from '../../_components/AssignClientDialog';
@@ -110,7 +110,7 @@ export function ClientsTableClient({ clients: initialClients, realtors }: Client
               <tr>
                 <td colSpan={6}>
                   <EmptyState
-                    icon={Users}
+                    icon="users"
                     title="No clients found"
                     description={searchTerm || statusFilter !== 'all' 
                       ? "Try adjusting your search or filter criteria" 

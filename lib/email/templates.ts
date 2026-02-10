@@ -5,7 +5,6 @@
 // Using inline CSS for maximum email client compatibility
 
 const BRAND_COLOR = '#2563eb'; // blue-600
-const _BRAND_COLOR_DARK = '#1d4ed8'; // blue-700 - reserved for future use
 const GRAY_600 = '#4b5563';
 const GRAY_800 = '#1f2937';
 
