@@ -2,16 +2,88 @@
 
 This document describes the complete database schema for Align, hosted on Supabase (PostgreSQL).
 
+**See also:** [README.md](./README.md) | [docs/API.md](./docs/API.md) | [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+
 ---
 
-## Quick Reference
+## Entity Relationship Overview
 
-| Migration File | Purpose | Tables Created |
-|----------------|---------|----------------|
-| `SETUP.sql` | Core auth/profiles | `profiles` |
-| `seed/quiz.sql` | Quiz system | `quiz_sections`, `quiz_questions`, `quiz_options`, `quiz_sessions`, `quiz_responses` |
-| `migrations/admin-panel.sql` | Admin panel | `clients`, `realtors`, `client_realtor_assignments`, `audit_logs`, `client_notes` |
-| (In app code) | Realtor dashboard | `leads`, `appointments`, `deals`, `crm_clients`, `referral_contracts`, `payouts`, `realtor_profile` |
+```mermaid
+erDiagram
+    profiles {
+        uuid id PK
+        text full_name
+        text phone
+        user_role role
+    }
+    clients {
+        uuid id PK
+        uuid profile_id FK
+        text full_name
+        text status
+    }
+    realtors {
+        uuid id PK
+        uuid profile_id FK
+        int capacity
+        bool is_active
+    }
+    client_realtor_assignments {
+        uuid id PK
+        uuid client_id FK
+        uuid realtor_id FK
+        timestamptz assigned_at
+        timestamptz unassigned_at
+    }
+    leads {
+        uuid id PK
+        uuid realtor_id FK
+        text full_name
+        text stage
+    }
+    quiz_sessions {
+        uuid id PK
+        uuid user_id FK
+        text status
+    }
+    quiz_responses {
+        uuid id PK
+        uuid session_id FK
+        uuid question_id FK
+        jsonb value
+    }
+    profiles ||--o{ clients : "has"
+    profiles ||--o{ realtors : "has"
+    clients ||--o{ client_realtor_assignments : "assigned via"
+    realtors ||--o{ client_realtor_assignments : "receives"
+    realtors ||--o{ leads : "owns"
+    profiles ||--o{ quiz_sessions : "takes"
+    quiz_sessions ||--o{ quiz_responses : "contains"
+```
+
+---
+
+## Migration Order
+
+Run these files in the Supabase SQL Editor **in order**:
+
+| Step | File | Purpose | Tables Created |
+|------|------|---------|----------------|
+| 1 | `SETUP.sql` | Core auth/profiles | `profiles` |
+| 2 | `seed/quiz.sql` | Quiz system tables + RPCs | `quiz_sections`, `quiz_questions`, `quiz_options`, `quiz_sessions`, `quiz_responses` |
+| 3 | `migrations/admin-panel.sql` | Admin panel tables, views, RPCs | `clients`, `realtors`, `client_realtor_assignments`, `audit_logs`, `client_notes` |
+| 4 | `migrations/sync-profiles-triggers.sql` | Profile sync on role changes | Triggers on `profiles` |
+| 5 | `migrations/assignment-lead-sync.sql` | Syncs assignments to realtor leads | Triggers on `client_realtor_assignments` |
+| 6 | `npm run seed:quiz` | Seed quiz questions from JSON | Populates quiz tables |
+| 7 *(optional)* | `migrations/admin-panel-seed.sql` | Test/demo data for development | Populates admin tables with sample records |
+
+After step 6, set the admin role manually:
+
+```sql
+UPDATE profiles SET role = 'admin' WHERE email = 'your@email.com';
+```
+
+> **Note:** The realtor dashboard tables (`leads`, `appointments`, `deals`, `crm_clients`, `referral_contracts`, `payouts`, `realtor_profile`) are created within the migration files above via the assignment-lead-sync migration and admin-panel migration. No separate migration file is required.
 
 ---
 
@@ -561,4 +633,8 @@ FROM quiz_sessions;
 
 ---
 
-*Last updated: January 2026*
+*Last updated: May 2026*
+
+---
+
+**See also:** [README.md](./README.md) | [docs/API.md](./docs/API.md) | [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
