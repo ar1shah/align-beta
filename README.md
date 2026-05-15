@@ -46,28 +46,28 @@ Admin Dashboard
 
 ```mermaid
 flowchart TB
-  subgraph browser [Browser]
-    ClientUI["Client — Quiz & Dashboard"]
-    AdminUI["Admin — Management Panel"]
-    RealtorUI["Realtor — CRM Dashboard"]
+  subgraph browser["Browser"]
+    ClientUI["Client - Quiz and Dashboard"]
+    AdminUI["Admin - Management Panel"]
+    RealtorUI["Realtor - CRM Dashboard"]
   end
 
-  subgraph nextjs ["Next.js 15 App Router"]
-    MW["middleware.ts (role guards)"]
-    RSC["Server Components (reads)"]
-    SA["Server Actions (admin & quiz mutations)"]
-    API["API Route Handlers (realtor mutations)"]
-    DBLayer["lib/db/* (data access layer)"]
+  subgraph nextjs["Next.js 15 App Router"]
+    MW["middleware.ts - role guards"]
+    RSC["Server Components - reads"]
+    SA["Server Actions - admin and quiz mutations"]
+    API["API Route Handlers - realtor mutations"]
+    DBLayer["lib/db - data access layer"]
   end
 
-  subgraph supabase [Supabase]
+  subgraph supabase["Supabase"]
     Auth["Supabase Auth"]
-    PG[("PostgreSQL + RLS")]
+    PG["PostgreSQL + RLS"]
     RT["Realtime"]
-    Storage["Storage (documents)"]
+    Storage["Storage - documents"]
   end
 
-  Resend["Resend (email)"]
+  Resend["Resend - email"]
 
   ClientUI --> MW
   AdminUI --> MW
@@ -78,9 +78,9 @@ flowchart TB
   SA --> DBLayer
   API --> DBLayer
   DBLayer --> PG
-  RealtorUI -- "lead updates" --> RT
+  RealtorUI -->|lead updates| RT
   RT --> PG
-  SA -- "assignment notifications" --> Resend
+  SA -->|assignment notifications| Resend
   API --> Storage
 ```
 
