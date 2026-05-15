@@ -13,7 +13,7 @@
 ## Overview
 
 Production: **Currently offline during updates**
-Vercel (use for testing) : ![https://align-beta-aris-projects-f14c4a84.vercel.app/](https://align-beta-aris-projects-f14c4a84.vercel.app/)
+Vercel (use for testing): [https://align-beta-aris-projects-f14c4a84.vercel.app/](https://align-beta-aris-projects-f14c4a84.vercel.app/)
 
 Align solves a specific gap in real estate: most platforms focus on property listings, but finding the *right agent* is often the harder problem. Align matches clients to agents based on their needs, preferences, and personality.
 
