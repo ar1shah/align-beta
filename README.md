@@ -28,6 +28,10 @@ Align solves a specific gap in real estate: most platforms focus on property lis
 
 ## Screenshots
 
+Landing Page
+
+![Landingpage](docs/screenshots/showcase_landing.png)
+
 Quiz Page
 
 ![Quiz](docs/screenshots/showcase_quiz.png)
