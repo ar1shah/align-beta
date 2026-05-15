@@ -99,7 +99,8 @@ sequenceDiagram
   A->>C: Email notification (match confirmed)
   A->>R: Email notification (new lead)
   R->>DB: Update lead stage / create deal
-``: 
+```
+
 ---
 
 ## Technical Architecture
