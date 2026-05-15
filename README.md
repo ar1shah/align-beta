@@ -29,8 +29,13 @@ Align solves a specific gap in real estate: most platforms focus on property lis
 ## Screenshots
 
 Quiz Page
-
 ![Quiz](docs/screenshots/showcase_quiz.png)
+
+Realtor Dashboard
+![Realtordash](docs/screenshots/showcase_realtordash.png)
+
+Admin Dashboard
+![Admindash](docs/screenshots/showcase_admindash.png)
 
 ---
 
