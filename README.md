@@ -1,20 +1,18 @@
 # Align
 
+**A full-stack real estate agent-matching platform.** 
+
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=nextdotjs)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://typescriptlang.org)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://vercel.com)
 
-**A full-stack real estate agent-matching platform.** Clients complete a detailed matching quiz, admins assign them to realtors, and realtors manage their leads via a drag-and-drop CRM dashboard — all backed by Supabase Postgres with row-level security.
-
-> Built as a full-stack portfolio project demonstrating Next.js 15 App Router, React Server Components, Supabase Auth + RLS, and a multi-role access-control system.
-
 ---
 
 ## Overview
 
-Align solves a specific gap in real estate: most platforms focus on property listings, but finding the *right agent* is often the harder problem. Align matches clients to agents based on their needs, preferences, and personality rather than just geography.
+Align solves a specific gap in real estate: most platforms focus on property listings, but finding the *right agent* is often the harder problem. Align matches clients to agents based on their needs, preferences, and personality.
 
 **Three user roles:**
 
@@ -24,21 +22,15 @@ Align solves a specific gap in real estate: most platforms focus on property lis
 | **Realtor** | Receives pre-qualified leads; manages pipeline, deals, and appointments |
 | **Admin** | Oversees all clients and realtors; handles assignments; monitors KPIs |
 
-**Business model:** Clients use the platform for free. Realtors receive matched leads. Align earns a 30–35% referral fee on closed deals — a model common in real estate wholesaling.
+**Business model:** Clients use the platform for free. Realtors receive matched leads. Align earns a 10-35% referral fee on closed deals.
 
 ---
 
 ## Screenshots
 
-> Add screenshots to `docs/screenshots/` after running the app locally. Suggested captures:
+Quiz Page
 
-| Screen | Description |
-|--------|-------------|
-| `docs/screenshots/homepage.png` | Landing page |
-| `docs/screenshots/quiz.png` | Client matching quiz in progress |
-| `docs/screenshots/admin-dashboard.png` | Admin KPI dashboard |
-| `docs/screenshots/admin-assignments.png` | Assignment management view |
-| `docs/screenshots/realtor-kanban.png` | Realtor Kanban lead pipeline |
+![Quiz](docs/screenshots/showcase_quiz.png)
 
 ---
 
@@ -272,11 +264,11 @@ See [docs/TESTING.md](./docs/TESTING.md) for detailed role-by-role test flows.
 ## Development Commands
 
 ```bash
-npm run dev          # Start local dev server at http://localhost:3000
-npm run build        # Production build (TypeScript + lint checks)
+npm run dev          # Start local dev server
+npm run build        # Production build
 npm run start        # Run the production build locally
 npm run lint         # ESLint check
-npm run seed:quiz    # Seed quiz questions into the database (idempotent)
+npm run seed:quiz    # Seed quiz questions into the database
 ```
 
 ---
@@ -327,20 +319,6 @@ align-beta/
 
 ---
 
-## Performance
-
-This app does not publish Lighthouse scores, but the following patterns are applied:
-
-- **React Server Components by default** — most pages render on the server with zero client JS.
-- **Quiz auto-save debounce** — answers are persisted at most once per 400ms, preventing excessive DB writes while typing.
-- **`revalidatePath()` after mutations** — Next.js cache is surgically invalidated after admin/quiz server actions, avoiding full-page refreshes.
-- **Supabase Realtime** — lead updates are pushed to the realtor Kanban over a WebSocket channel rather than polling.
-- **Lazy client components** — interactive islands (modals, Kanban, forms) are the only client-side JS; everything else is static HTML.
-
-To benchmark: run `npm run build` and check the route size output. Enable [Vercel Analytics](https://vercel.com/analytics) for real-user metrics in production.
-
----
-
 ## Security
 
 | Mechanism | Where |
@@ -353,19 +331,19 @@ To benchmark: run `npm run build` and check the route size output. Enable [Verce
 | **Immutable audit log** | `audit_logs` table has no update/delete RLS policies |
 | **Explicit session checks** | `sign-msa` and `convert-to-client` route handlers verify session independently |
 
-**Transparency note:** Several realtor mutation routes (`update-stage`, `decline`, `set-next-touch`, etc.) rely on Supabase RLS for authorization rather than an in-handler session check. The database will reject any unauthorized query — this is intentional and consistent with Supabase's recommended pattern.
+**Note:** Several realtor mutation routes (`update-stage`, `decline`, `set-next-touch`, etc.) rely on Supabase RLS for authorization rather than an in-handler session check. The database will reject any unauthorized query. This is intentional and consistent with Supabase's recommended pattern.
 
 ---
 
 ## Deployment Options
 
-### Vercel (recommended)
+### Vercel
 
 1. Push the repo to GitHub.
 2. Import the project in the [Vercel dashboard](https://vercel.com/new).
-3. Add the five environment variables from `.env.local.example` under **Settings → Environment Variables**.
-4. Add your production domain to Supabase Auth → **URL Configuration → Redirect URLs**.
-5. Deploy — Vercel auto-deploys on every push to `main`.
+3. Add the environment variables from `.env.local.example`.
+4. Add your production domain to Supabase Auth.
+5. Deploy. Vercel auto-deploys on every push to `main`.
 
 ### Self-hosted (Node.js)
 
@@ -373,8 +351,6 @@ To benchmark: run `npm run build` and check the route size output. Enable [Verce
 npm run build
 npm run start         # Listens on port 3000 by default
 ```
-
-Set `PORT` environment variable to change the port. A reverse proxy (nginx, Caddy) is recommended for TLS termination in production.
 
 ---
 
@@ -386,11 +362,9 @@ Copy `.env.local.example` to `.env.local` and fill in your values:
 |----------|----------|-------------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Your Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon/public key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Seed only | Service role key — used by `npm run seed:quiz` only, never exposed client-side |
+| `SUPABASE_SERVICE_ROLE_KEY` | Seed only | Service role key — used by `npm run seed:quiz` only |
 | `RESEND_API_KEY` | Optional | Resend API key for assignment email notifications |
 | `NEXT_PUBLIC_APP_URL` | Optional | App base URL for email links (defaults to `http://localhost:3000`) |
-
-Find your Supabase credentials at: [supabase.com/dashboard](https://supabase.com/dashboard) → Project Settings → API.
 
 ---
 
@@ -454,19 +428,14 @@ Run `npm run lint` first to identify issues. Common causes: missing environment 
 | Realtor CRM | Complete |
 | Email notifications | Complete |
 | Automated test suite | Not yet implemented |
-| Matching algorithm | Planned (Phase 3) |
-| SMS notifications | Planned (Phase 2) |
-| Stripe / payout processing | Planned (Phase 4) |
-| Mobile app | Planned (Phase 5) |
+| Matching algorithm | Planned |
+| SMS notifications | Planned |
+| Stripe / payout processing | Planned |
 
 See [docs/ARCHITECTURE.md#roadmap](./docs/ARCHITECTURE.md#roadmap) for the full phased roadmap.
 
 ---
 
-## License
+## Credits
 
-[MIT](./LICENSE)
-
----
-
-*Built with Next.js, Supabase, and Tailwind CSS.*
+Built by [ar1shah](https://github.com/ar1shah). Licensed under the [MIT](./LICENSE)
