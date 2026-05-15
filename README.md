@@ -171,7 +171,7 @@ sequenceDiagram
 ### Prerequisites
 
 - [Node.js](https://nodejs.org) 20+
-- A [Supabase](https://supabase.com) project (fr ee tier works)
+- A [Supabase](https://supabase.com) project (free tier works)
 - A [Resend](https://resend.com) account (optional: only needed for email notifications)
 
 ### 1. Clone and install
@@ -424,7 +424,7 @@ Run `npm run lint` first to identify issues. Common causes: missing environment 
 
 ## Project Status
 
-**Status: MVP — actively developed portfolio project**
+**Status: MVP — production paused**
 
 | Area | Status |
 |------|--------|

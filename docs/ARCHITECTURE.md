@@ -191,13 +191,6 @@ Templates live in `lib/email/templates.ts`. The sender domain defaults to `app.a
 
 ### Production checklist
 
-- [ ] All five environment variables set in Vercel dashboard
-- [ ] Supabase Auth redirect URLs include the production domain
-- [ ] Supabase Storage bucket policies reviewed
-- [ ] Resend sender domain verified
-- [ ] Error tracking (e.g. Sentry) configured
-- [ ] Vercel Analytics enabled
-
 ---
 
 ## Roadmap
@@ -210,31 +203,13 @@ Templates live in `lib/email/templates.ts`. The sender domain defaults to `app.a
 - Realtor CRM: onboarding, leads Kanban, appointments, deals, payouts, realtime updates
 - Email notifications via Resend
 
-### Phase 2 — Enhanced operations
+### Features to be implemented:
 
 - [ ] SMS notifications for realtors
 - [ ] Dashboard charts (assignments over time, conversion funnel)
 - [ ] Client import from CSV
-- [ ] SLA tracking (flag clients unassigned >24h)
-
-### Phase 3 — Automation & intelligence
-
 - [ ] Automated assignment rules (round-robin, capacity-based)
-- [ ] Realtor performance metrics (conversion rate, response time)
 - [ ] Matching algorithm (score realtors based on quiz answers)
-- [ ] Match percentage display on client dashboard
-
-### Phase 4 — Integrations
-
-- [ ] Google / Outlook calendar sync
-- [ ] DocuSign / HelloSign for real MSA e-signatures
 - [ ] Stripe for payout processing
 - [ ] External CRM integration
-
-### Phase 5 — Scale & polish
-
-- [ ] Multi-tenant support (multiple offices/brands)
-- [ ] Role-based sub-admins (team leads)
 - [ ] Advanced analytics dashboard
-- [ ] Public REST API for external integrations
-- [ ] React Native mobile app
