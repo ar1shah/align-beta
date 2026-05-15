@@ -1,10 +1,7 @@
 -- ==========================================
 -- ALIGN - PROFILE SYNC TRIGGERS
 -- ==========================================
--- This migration creates triggers to automatically sync
--- profiles table to clients and realtors tables.
--- Run this in your Supabase SQL Editor.
--- ==========================================
+
 
 -- 1) FUNCTION: Sync profile to clients table
 -- ==========================================

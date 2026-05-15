@@ -1,8 +1,7 @@
 -- ==========================================
 -- ALIGN - ADMIN PANEL SEED DATA (OPTIONAL)
 -- ==========================================
--- Use this to create test data for development
--- ==========================================
+
 
 -- Sample Realtors
 INSERT INTO public.realtors(full_name, email, phone, active, capacity, msa_signed_at)
@@ -23,8 +22,4 @@ VALUES
   ('Lisa Anderson', 'lisa.anderson@example.com', '+1-555-1006', 'new', 'quiz', ARRAY['buyer']),
   ('Robert Taylor', 'robert.taylor@example.com', '+1-555-1007', 'qualified', 'quiz', ARRAY['seller', 'downsizing']),
   ('Jennifer Lee', 'jennifer.lee@example.com', '+1-555-1008', 'new', 'referral', ARRAY['buyer']);
-
--- ==========================================
--- ✅ SEED DATA COMPLETE!
--- ==========================================
 

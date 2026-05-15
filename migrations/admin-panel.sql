@@ -1,9 +1,7 @@
 -- ==========================================
 -- ALIGN - ADMIN PANEL MIGRATION
 -- ==========================================
--- Run this in your Supabase SQL Editor
--- This script is idempotent and safe to re-run
--- ==========================================
+
 
 -- 1) HELPER FUNCTIONS FOR ROLE CHECKS
 -- ==========================================

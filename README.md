@@ -29,12 +29,15 @@ Align solves a specific gap in real estate: most platforms focus on property lis
 ## Screenshots
 
 Quiz Page
+
 ![Quiz](docs/screenshots/showcase_quiz.png)
 
 Realtor Dashboard
+
 ![Realtordash](docs/screenshots/showcase_realtordash.png)
 
 Admin Dashboard
+
 ![Admindash](docs/screenshots/showcase_admindash.png)
 
 ---
@@ -96,25 +99,22 @@ sequenceDiagram
   A->>C: Email notification (match confirmed)
   A->>R: Email notification (new lead)
   R->>DB: Update lead stage / create deal
-```
-
-> To export this as a PNG for social sharing, paste the Mermaid source at [mermaid.live](https://mermaid.live) and export. Or use [draw.io](https://diagrams.net) for a custom diagram — save to `docs/screenshots/system-design.png`.
-
+``: 
 ---
 
 ## Technical Architecture
 
 - **Next.js 15 App Router** with React Server Components as the default. Client components are used only for interactive elements: Kanban DnD, modals, controlled forms, and Supabase Realtime subscriptions.
 - **Two mutation patterns:** admin/quiz mutations use Next.js Server Actions (called directly from forms/components); realtor mutations use conventional REST route handlers under `app/api/`.
-- **`lib/db/*` data access layer** — all Supabase queries are centralized in typed modules, never scattered across components.
-- **Supabase RLS** enforces authorization at the database level. The middleware and layout redirects are a UX convenience on top — the DB will reject unauthorized queries regardless.
-- **Assignment-sync trigger** — when an admin assigns a client, a Postgres trigger automatically creates a `leads` record in the realtor's pipeline, which Supabase Realtime delivers to the realtor's Kanban without a page refresh.
-- **Immutable audit log** — every admin action is appended to `audit_logs` with actor, entity, and metadata. No update/delete policies on that table.
-- **Quiz content in DB** — sections, questions, options, and conditional visibility rules are stored in `quiz_*` tables and seeded via `npm run seed:quiz`. Content changes don't require a code deploy.
+- **`lib/db/*` data access layer**: all Supabase queries are centralized in typed modules, never scattered across components.
+- **Supabase RLS** enforces authorization at the database level. The middleware and layout redirects are a UX convenience on top, the DB will reject unauthorized queries regardless.
+- **Assignment-sync trigger**: when an admin assigns a client, a Postgres trigger automatically creates a `leads` record in the realtor's pipeline, which Supabase Realtime delivers to the realtor's Kanban without a page refresh.
+- **Immutable audit log**: every admin action is appended to `audit_logs` with actor, entity, and metadata. No update/delete policies on that table.
+- **Quiz content in DB**:  sections, questions, options, and conditional visibility rules are stored in `quiz_*` tables and seeded via `npm run seed:quiz`. Content changes don't require a code deploy.
 
 ---
 
-## Technology Stack
+## Tech Stack
 
 | Layer | Technology | Notes |
 |-------|-----------|-------|
@@ -140,9 +140,19 @@ sequenceDiagram
 - 9-section matching quiz with 45+ questions
 - 11 question types: single/multi choice, text, number, money, address, yes/no, phone, email, date
 - Conditional section visibility (questions adapt based on prior answers)
-- Auto-save with 400ms debounce — quiz resumes exactly where left off
+- Auto-save with 400ms debounce (quiz resumes exactly where left off)
 - Mobile-optimized with sticky footer navigation and progress bar
 - Dashboard shows matched realtor details after assignment
+
+### Realtor
+- Onboarding flow: profile completion + MSA digital signature
+- Leads Kanban with drag-and-drop stage management (New, Working, Nurture, Client / Lost)
+- Lead actions: set follow-up date, decline with reason, convert to CRM client
+- Appointments management (create, view)
+- Deals pipeline with property details and offer price
+- CRM clients table
+- Referral contracts and payouts
+- Realtime lead delivery via Supabase subscriptions
 
 ### Admin
 - KPI dashboard: client count, realtor count, utilization rate, work queues
@@ -153,16 +163,6 @@ sequenceDiagram
 - Bulk operations and work queues (unassigned clients, recent submissions)
 - Immutable audit log of all admin actions
 
-### Realtor
-- Onboarding flow: profile completion + MSA digital signature
-- Leads Kanban with drag-and-drop stage management (New → Working → Nurture → Client / Lost)
-- Lead actions: set follow-up date, decline with reason, convert to CRM client
-- Appointments management (create, view)
-- Deals pipeline with property details and offer price
-- CRM clients table
-- Referral contracts and payouts (read-only)
-- Realtime lead delivery via Supabase subscriptions — no refresh needed
-
 ---
 
 ## Quick Start
@@ -170,8 +170,8 @@ sequenceDiagram
 ### Prerequisites
 
 - [Node.js](https://nodejs.org) 20+
-- A [Supabase](https://supabase.com) project (free tier works)
-- A [Resend](https://resend.com) account (optional — only needed for email notifications)
+- A [Supabase](https://supabase.com) project (fr ee tier works)
+- A [Resend](https://resend.com) account (optional: only needed for email notifications)
 
 ### 1. Clone and install
 
@@ -187,11 +187,11 @@ npm install
 cp .env.local.example .env.local
 ```
 
-Open `.env.local` and fill in your Supabase project URL and keys. See [Environment Configuration](#environment-configuration) for details.
+Open `.env.local` and fill in your Supabase project URL and keys. More details in [Environment Configuration](#environment-configuration)
 
 ### 3. Run database migrations
 
-Open the [Supabase SQL Editor](https://supabase.com/dashboard) for your project and run these files **in order**:
+Open the Supabase SQL Editor for your project and run these files **in order**:
 
 ```
 1. SETUP.sql
@@ -209,7 +209,7 @@ See [DATABASE.md](./DATABASE.md) for the full migration reference.
 npm run seed:quiz
 ```
 
-This populates the quiz tables with all 45+ questions. It is idempotent — safe to re-run.
+This populates the quiz tables with all 45+ questions.
 
 ### 5. Set your admin account
 
@@ -254,15 +254,15 @@ Visit [http://localhost:3000](http://localhost:3000).
 
 ## Test Users
 
-Use these accounts to explore each role. Create them via the signup page, then set roles via SQL as shown.
+Use these accounts to explore each role. Use at [https://align-beta-aris-projects-f14c4a84.vercel.app/](https://align-beta-aris-projects-f14c4a84.vercel.app/).
 
 | Role | Email | Password | Setup |
 |------|-------|----------|-------|
-| **Admin** | *(add your admin email)* | *(add password)* | `UPDATE profiles SET role = 'admin' WHERE email = '...';` |
-| **Realtor** | *(add realtor email)* | *(add password)* | `UPDATE profiles SET role = 'realtor' WHERE email = '...';` — then complete onboarding |
-| **Client** | *(add client email)* | *(add password)* | Default role — complete the matching quiz |
+| **Admin** | *ari@kolqua.com* | *ari123* | `UPDATE profiles SET role = 'admin' WHERE email = '...';` |
+| **Realtor** | *realtor@kolqua.com* | *realtor123* | `UPDATE profiles SET role = 'realtor' WHERE email = '...';`, then complete onboarding |
+| **Client** | *client@kolqua.com* | *client123* | Default role (make new account for test) |
 
-See [docs/TESTING.md](./docs/TESTING.md) for detailed role-by-role test flows.
+See [docs/TESTING.md](./docs/TESTING.md) for detailed test flows.
 
 ---
 
